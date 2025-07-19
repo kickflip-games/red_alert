@@ -48,11 +48,3 @@ func execute_attack():
 func cleanup():
 	attack_finished.emit()
 	queue_free()
-
-# Helper function to check if point is in warning area
-func is_point_in_warning_area(point: Vector2) -> bool:
-	return false  # Override in subclasses
-
-# Helper function to check if point is in attack area
-func is_point_in_attack_area(point: Vector2) -> bool:
-	return false  # Override in subclasses

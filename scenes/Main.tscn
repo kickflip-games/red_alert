@@ -8,11 +8,12 @@
 
 [node name="Main" type="Node2D"]
 
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(576, 322)
+
 [node name="Player" parent="." instance=ExtResource("3_c01mt")]
 
 [node name="AttackManager" parent="." instance=ExtResource("4_nxtc6")]
-
-[node name="Camera2D" type="Camera2D" parent="."]
 
 [node name="HUD" parent="." node_paths=PackedStringArray("player") instance=ExtResource("4_rarhs")]
 player = NodePath("../Player")

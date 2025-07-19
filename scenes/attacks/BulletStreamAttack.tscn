@@ -1,3 +1,8 @@
-[gd_scene format=3 uid="uid://bbilyyr7k5y11"]
+[gd_scene load_steps=3 format=3 uid="uid://bbilyyr7k5y11"]
+
+[ext_resource type="Script" uid="uid://dx0cvygycfsmc" path="res://scenes/attacks/BulletStreamAttack.gd" id="1_igm57"]
+[ext_resource type="Texture2D" uid="uid://b0tywprws3pjp" path="res://assets/textures/exclaimation.png" id="2_udbwp"]
 
 [node name="BulletStreamAttack" type="Node2D"]
+script = ExtResource("1_igm57")
+warning_icon_texture = ExtResource("2_udbwp")

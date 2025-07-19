@@ -4,9 +4,9 @@ extends CanvasLayer
 @export var heart_full_texture: Texture2D
 @export var heart_empty_texture: Texture2D
 
-@onready var hp_label := $HPLabel
-@onready var dash_bar := $DashCooldownBar
-@onready var hearts := $Hearts
+@onready var hp_label := $PlayerUi/HPLabel
+@onready var dash_bar := $PlayerUi/DashCooldownBar
+@onready var hearts := $PlayerUi/Hearts
 @onready var tween := create_tween()
 
 func _ready():

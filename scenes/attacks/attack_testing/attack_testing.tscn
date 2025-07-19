@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dq1yeo81grtaj"]
+
+[ext_resource type="PackedScene" uid="uid://ba4erv8r40yb3" path="res://managers/AttackManager.tscn" id="2_n5fnu"]
+
+[node name="AttackTesting" type="Node2D"]
+
+[node name="AttackManager" parent="." instance=ExtResource("2_n5fnu")]

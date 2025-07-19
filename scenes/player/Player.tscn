@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://corxhrleskgv"]
+[gd_scene load_steps=6 format=3 uid="uid://corxhrleskgv"]
 
 [ext_resource type="Script" uid="uid://ct2s5gu2mvdyu" path="res://scenes/player/Player.gd" id="1_p0vlq"]
 [ext_resource type="Texture2D" uid="uid://dnj15kqmp5xsi" path="res://assets/textures/ship.png" id="2_4kuee"]
@@ -7,10 +7,15 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_4kuee"]
 radius = 4.0
 
+[sub_resource type="Curve" id="Curve_4kuee"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.99053025, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [node name="Player" type="Node2D"]
 script = ExtResource("1_p0vlq")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+rotation = 1.5707964
 texture = ExtResource("2_4kuee")
 
 [node name="Reticle" type="Sprite2D" parent="."]
@@ -24,3 +29,19 @@ texture = ExtResource("2_gfjak")
 shape = SubResource("CircleShape2D_4kuee")
 
 [node name="DashParticles" type="GPUParticles2D" parent="."]
+
+[node name="TurnFXLeft" type="Line2D" parent="."]
+position = Vector2(0, -8)
+points = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+width = 5.0
+width_curve = SubResource("Curve_4kuee")
+
+[node name="TurnFXRight" type="Line2D" parent="."]
+position = Vector2(0, 9)
+points = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+width = 5.0
+width_curve = SubResource("Curve_4kuee")
+
+[node name="DashTrail" type="Line2D" parent="."]
+points = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+width_curve = SubResource("Curve_4kuee")
