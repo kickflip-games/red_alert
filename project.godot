@@ -15,6 +15,10 @@ run/main_scene="uid://c7etnmicu136n"
 config/features=PackedStringArray("4.5")
 config/icon="uid://dnj15kqmp5xsi"
 
+[autoload]
+
+CameraBounds="*res://autoloads/CameraBounds.gd"
+
 [display]
 
 window/stretch/mode="viewport"

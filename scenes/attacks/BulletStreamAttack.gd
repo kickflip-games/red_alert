@@ -26,17 +26,19 @@ func _ready():
 
 func get_camera_bounds() -> Rect2:
 	var camera = get_viewport().get_camera_2d()
-
-	var viewport_size = get_viewport().get_visible_rect().size
-	var zoom = camera.zoom
-	
-	# Calculate the actual visible area in world coordinates
-	var visible_size = viewport_size / zoom
-	var top_left = camera.global_position - visible_size * 0.5
-	
-	return Rect2(top_left, visible_size)
-	
-	
+	if camera:
+		var viewport_size = get_viewport().get_visible_rect().size
+		var zoom = camera.zoom
+		
+		# Calculate the actual visible area in world coordinates
+		var visible_size = viewport_size / zoom
+		var top_left = camera.global_position - visible_size * 0.5
+		
+		return Rect2(top_left, visible_size)
+	else:
+		# Fallback to viewport if no camera found
+		print("Warning: No Camera2D found, using viewport bounds")
+		return Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
 
 func show_warning():
 	# Create warning line
