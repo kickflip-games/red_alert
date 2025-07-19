@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3 uid="uid://corxhrleskgv"]
+
+[ext_resource type="Script" uid="uid://ct2s5gu2mvdyu" path="res://scenes/player/Player.gd" id="1_p0vlq"]
+[ext_resource type="Texture2D" uid="uid://dnj15kqmp5xsi" path="res://assets/textures/ship.png" id="2_4kuee"]
+[ext_resource type="Texture2D" uid="uid://cyedncb0hj8an" path="res://assets/textures/crosshair102.png" id="2_gfjak"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4kuee"]
+radius = 4.0
+
+[node name="Player" type="Node2D"]
+script = ExtResource("1_p0vlq")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_4kuee")
+
+[node name="Reticle" type="Sprite2D" parent="."]
+position = Vector2(-1.9073486e-06, -17.999996)
+scale = Vector2(0.228, 0.228)
+texture = ExtResource("2_gfjak")
+
+[node name="CollisionArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionArea"]
+shape = SubResource("CircleShape2D_4kuee")
+
+[node name="DashParticles" type="GPUParticles2D" parent="."]

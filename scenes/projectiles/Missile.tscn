@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cmvkkpna2dchu"]
+
+[ext_resource type="Script" uid="uid://g051xgs51gp2" path="res://scenes/projectiles/Missile.gd" id="1_4f2n0"]
+
+[node name="Missile" type="Node2D"]
+script = ExtResource("1_4f2n0")

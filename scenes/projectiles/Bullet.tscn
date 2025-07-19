@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://bhgqp6tofyulb"]
+
+[ext_resource type="Script" uid="uid://dhkllrxayug06" path="res://scenes/projectiles/Bullet.gd" id="1_ci251"]
+[ext_resource type="Texture2D" uid="uid://bm4fkgrdxkiwd" path="res://assets/textures/tiles_packed.png" id="2_36ope"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ci251"]
+size = Vector2(6, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kghso"]
+atlas = ExtResource("2_36ope")
+region = Rect2(5, 0, 6, 16.25)
+
+[node name="Bullet" type="RigidBody2D"]
+script = ExtResource("1_ci251")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_ci251")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_kghso")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-3, -8, 6, 16)

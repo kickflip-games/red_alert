@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://bib5lohuq1xli"]
+
+[ext_resource type="Script" uid="uid://ct0mjkwg5mxy8" path="res://scenes/ui/HUD.gd" id="1_r8hcy"]
+[ext_resource type="Texture2D" uid="uid://blmdh84m208op" path="res://assets/textures/heart/heart_full.png" id="2_atyv1"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_r8hcy")
+
+[node name="Hearts" type="HBoxContainer" parent="."]
+offset_top = 82.0
+offset_right = 40.0
+offset_bottom = 122.0
+
+[node name="TextureRect" type="TextureRect" parent="Hearts"]
+layout_mode = 2
+texture = ExtResource("2_atyv1")
+
+[node name="TextureRect2" type="TextureRect" parent="Hearts"]
+layout_mode = 2
+texture = ExtResource("2_atyv1")
+
+[node name="TextureRect3" type="TextureRect" parent="Hearts"]
+layout_mode = 2
+texture = ExtResource("2_atyv1")
+
+[node name="DashBar" type="ProgressBar" parent="."]
+offset_left = 62.0
+offset_right = 66.0
+offset_bottom = 27.0
+
+[node name="HPLabel" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0

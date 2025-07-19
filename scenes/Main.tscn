@@ -1,0 +1,20 @@
+[gd_scene load_steps=6 format=3 uid="uid://c7etnmicu136n"]
+
+[ext_resource type="PackedScene" uid="uid://corxhrleskgv" path="res://scenes/player/Player.tscn" id="3_c01mt"]
+[ext_resource type="PackedScene" uid="uid://ba4erv8r40yb3" path="res://managers/AttackManager.tscn" id="4_nxtc6"]
+[ext_resource type="PackedScene" uid="uid://bib5lohuq1xli" path="res://scenes/ui/HUD.tscn" id="4_rarhs"]
+[ext_resource type="Texture2D" uid="uid://blmdh84m208op" path="res://assets/textures/heart/heart_full.png" id="5_c01mt"]
+[ext_resource type="Texture2D" uid="uid://48kbqnmj1mpn" path="res://assets/textures/heart/heart_empty.png" id="6_nxtc6"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Player" parent="." instance=ExtResource("3_c01mt")]
+
+[node name="AttackManager" parent="." instance=ExtResource("4_nxtc6")]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="HUD" parent="." node_paths=PackedStringArray("player") instance=ExtResource("4_rarhs")]
+player = NodePath("../Player")
+heart_full_texture = ExtResource("5_c01mt")
+heart_empty_texture = ExtResource("6_nxtc6")

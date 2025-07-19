@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://jvqn5dsaffi3"]
+
+[ext_resource type="Script" uid="uid://pu0uggr7ttg0" path="res://scenes/projectiles/Laser.gd" id="1_jiyle"]
+
+[node name="Laser" type="Node2D"]
+script = ExtResource("1_jiyle")
