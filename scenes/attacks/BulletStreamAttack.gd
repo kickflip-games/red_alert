@@ -7,50 +7,39 @@ class_name BulletStreamAttack
 @export var bullet_speed: float = 300.0
 @export var bullet_spacing: float = 50.0
 @export var warning_icon_texture: Texture2D  # Optional custom warning icon
+@export var debug_draw := true
 
 const bullet_scene = preload("res://scenes/projectiles/Bullet.tscn")
 
 var warning_line: Line2D
 var warning_icon: Sprite2D
 var bullets: Array[RigidBody2D] = []
+var end_position: Vector2
 
 func _ready():
-	direction = direction.normalized()
-	
-	# Set default start position if not specified
+	var bounds = CameraBounds.rect
+
+	# Compute start and end positions based on direction
 	if start_position == Vector2.ZERO:
-		var bounds = get_camera_bounds()
-		start_position = Vector2(bounds.position.x - 50, bounds.position.y + bounds.size.y / 2)
-	
+		start_position = get_edge_spawn_point(bounds, direction, 50.0)
+
+	end_position = get_edge_spawn_point(bounds, -direction, 50.0)
+	direction = (end_position - start_position).normalized()
+
 	super._ready()
 
-func get_camera_bounds() -> Rect2:
-	var camera = get_viewport().get_camera_2d()
-	if camera:
-		var viewport_size = get_viewport().get_visible_rect().size
-		var zoom = camera.zoom
-		
-		# Calculate the actual visible area in world coordinates
-		var visible_size = viewport_size / zoom
-		var top_left = camera.global_position - visible_size * 0.5
-		
-		return Rect2(top_left, visible_size)
-	else:
-		# Fallback to viewport if no camera found
-		print("Warning: No Camera2D found, using viewport bounds")
-		return Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
+func get_edge_spawn_point(bounds: Rect2, dir: Vector2, padding: float = 50.0) -> Vector2:
+	var center = bounds.position + bounds.size * 0.5
+	var half = bounds.size * 0.5
+	var offset = dir.normalized() * (half + Vector2(padding, padding))
+	return center + offset
 
 func show_warning():
 	# Create warning line
 	warning_line = Line2D.new()
 	warning_line.width = stream_width
-	warning_line.default_color = Color(1, 0, 0, 0.5)
+	warning_line.default_color = Color(1, 0, 0, 0.2)
 	add_child(warning_line)
-
-	var bounds = get_camera_bounds()
-	# Calculate end position that extends beyond the visible area
-	var travel_distance = bounds.size.length() + 100  # Add some buffer
-	var end_position = start_position + direction * travel_distance
 
 	warning_line.add_point(start_position)
 	warning_line.add_point(end_position)
@@ -58,27 +47,26 @@ func show_warning():
 	# Animate warning line (pulsing)
 	var tween = create_tween()
 	tween.set_loops()
+	tween.tween_property(warning_line, "default_color:a", 0.05, 0.3)
 	tween.tween_property(warning_line, "default_color:a", 0.2, 0.3)
-	tween.tween_property(warning_line, "default_color:a", 0.7, 0.3)
 
-	# Create warning icon
+	# Optional warning icon
 	if warning_icon_texture:
 		warning_icon = Sprite2D.new()
+		warning_icon.scale = Vector2(5,5)
 		warning_icon.texture = warning_icon_texture
-		warning_icon.position = start_position
+		warning_icon.position = start_position + (direction * 70.0)  # pull it into screen
 		add_child(warning_icon)
 
-		# Animate icon (pulse alpha + scale)
+		# Animate icon
 		var icon_tween = create_tween()
 		icon_tween.set_loops()
 
-		# Pulse alpha
-		icon_tween.tween_property(warning_icon, "modulate:a", 0.2, 0.4)
-		icon_tween.tween_property(warning_icon, "modulate:a", 0.9, 0.4)
+		#icon_tween.tween_property(warning_icon, "modulate:a", 0.5, 0.4)
+		#icon_tween.tween_property(warning_icon, "modulate:a", 0.9, 0.4)
 
-		# Pulse scale
-		icon_tween.parallel().tween_property(warning_icon, "scale", Vector2(2.2, 2.2), 0.4)
-		icon_tween.parallel().tween_property(warning_icon, "scale", Vector2(1.8, 1.8), 0.4)
+		icon_tween.parallel().tween_property(warning_icon, "scale", Vector2(6.2, 6.2), 0.3)
+		icon_tween.parallel().tween_property(warning_icon, "scale", Vector2(4.8, 4.8), 0.3)
 
 func hide_warning():
 	if warning_line:
@@ -90,21 +78,16 @@ func execute_attack():
 	spawn_bullets()
 
 func spawn_bullets():
-	var bounds = get_camera_bounds()
-	# Use diagonal length of camera bounds plus buffer for total travel distance
-	var travel_distance = bounds.size.length() + 200
-	var bullet_count = int(travel_distance / bullet_spacing)
-
-	# Start bullets off-screen, heading toward start_position
-	var spawn_origin = start_position - direction * travel_distance * 0.5
+	var total_distance = (end_position - start_position).length()
+	var bullet_count = int(total_distance / bullet_spacing)
 
 	for i in range(bullet_count):
 		var bullet = bullet_scene.instantiate()
 		get_parent().add_child(bullet)
 
-		bullet.global_position = spawn_origin + direction * (i * bullet_spacing)
+		var pos = start_position + direction * (i * bullet_spacing)
+		bullet.global_position = pos
 		bullet.rotation = direction.angle()
-		bullet.set_velocity(direction * bullet_speed)
 		bullet.linear_velocity = direction * bullet_speed
 		bullets.append(bullet)
 
@@ -118,3 +101,13 @@ func _cleanup_bullets():
 	for bullet in bullets:
 		if is_instance_valid(bullet):
 			bullet.queue_free()
+
+func _draw():
+	if not debug_draw:
+		return
+
+	draw_circle(to_local(start_position), 6, Color.YELLOW)
+	draw_circle(to_local(end_position), 6, Color.CYAN)
+
+	var arrow_tip = to_local(start_position + direction * 30.0)
+	draw_line(to_local(start_position), arrow_tip, Color.ORANGE, 2)
