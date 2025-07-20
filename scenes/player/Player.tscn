@@ -111,15 +111,19 @@ width_curve = SubResource("Curve_4kuee")
 default_color = Color(1, 1, 1, 0.30600002)
 
 [node name="TurnFXLeft" type="Line2D" parent="."]
-position = Vector2(0, -8)
-points = PackedVector2Array(0, 0, 0, 0)
-width = 5.0
+visible = false
+z_index = -1
+position = Vector2(0, -10)
+points = PackedVector2Array(-10, 0, 0, 0)
+width = 4.0
 width_curve = SubResource("Curve_4kuee")
 
 [node name="TurnFXRight" type="Line2D" parent="."]
-position = Vector2(0, 9)
-points = PackedVector2Array(0, 0, 0, 0)
-width = 5.0
+visible = false
+z_index = -1
+position = Vector2(0, 10)
+points = PackedVector2Array(-10, 0, 0, 0)
+width = 4.0
 width_curve = SubResource("Curve_4kuee")
 
 [node name="DashTrail" type="Line2D" parent="."]

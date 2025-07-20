@@ -53,6 +53,12 @@ var movement_trail_points: Array = []
 var max_movement_trail_points := 20
 var dash_trail_tween: Tween
 var dash_trail_active = false
+var turn_trail_points_left = []
+var turn_trail_points_right = []
+var max_turn_trail_points = 20  # Adjust as needed
+var is_sharp_turning = false
+var turn_trail_fade_speed = 1.0  # Adjust fade speed
+
 
 # --- Nodes ---
 @onready var sprite: Sprite2D = $Sprite2D
@@ -80,23 +86,11 @@ func _ready():
 	emit_signal("hp_changed", current_hp)
 	last_rotation = rotation
 	
-	# Setup all visual systems
-	_setup_turn_fx()
 	#_setup_movement_trail()
 	_setup_dash_dial()
 	
 
 
-func _setup_turn_fx():
-	# Left wing trail with curve support
-	turn_fx_left.width = 4.0
-	turn_fx_left.default_color = Color(0.3, 0.8, 1.0, 0.0)
-	turn_fx_left.visible = false
-	
-	# Right wing trail with curve support
-	turn_fx_right.width = 4.0
-	turn_fx_right.default_color = Color(0.3, 0.8, 1.0, 0.0)
-	turn_fx_right.visible = false
 
 
 func _setup_movement_trail():
@@ -142,7 +136,7 @@ func _process(delta):
 		_update_movement_particles()
 
 	# Update all visual effects
-	_update_turn_effects(delta)
+	#_update_turn_effects(delta)
 	_update_reticle(delta)
 	_update_dash_dial()
 	#_update_idle_pulse(delta)
@@ -267,8 +261,9 @@ func _handle_circling_movement(delta):
 	if velocity.length() > circle_speed:
 		velocity = velocity.normalized() * circle_speed
 
+
 func _handle_rotation_and_turns(delta):
-	if velocity.length() > 10.0:
+	if velocity.length() > 2.0:
 		var target_rotation = velocity.angle()
 		rotation = lerp_angle(rotation, target_rotation, turn_rate * delta)
 		
@@ -276,54 +271,28 @@ func _handle_rotation_and_turns(delta):
 		var turn_speed = rotation_change / delta
 		
 		if turn_speed > sharp_turn_threshold:
-			_trigger_curved_turn_effects(turn_speed)
+			print("SHARP TURN")
+			if !is_sharp_turning:
+				# Just started sharp turning - reset trails
+				is_sharp_turning = true
+				turn_trail_points_left.clear()
+				turn_trail_points_right.clear()
+			
+			
+			update_turn_trail_right()
+			update_turn_trail_left()
+				
+		else:
+			if is_sharp_turning:
+				# Just stopped sharp turning - start fade
+				is_sharp_turning = false
+				start_turn_trails_fade()
 		
 		last_rotation = rotation
 
-# --- Enhanced Turn Effects with Curves ---
-func _trigger_curved_turn_effects(turn_intensity: float):
-	turn_fx_timer = turn_fx_duration
-	
-	var wing_offset = 25.0
-	var wing_direction = Vector2(cos(rotation + PI/2), sin(rotation + PI/2))
-	
-	# Create curved trails based on velocity history
-	var left_wing_pos = global_position - wing_direction * wing_offset
-	var right_wing_pos = global_position + wing_direction * wing_offset
-	
-	_create_curved_wing_trail(turn_fx_left, left_wing_pos, turn_intensity, -1)
-	_create_curved_wing_trail(turn_fx_right, right_wing_pos, turn_intensity, 1)
-
-func _create_curved_wing_trail(trail: Line2D, wing_pos: Vector2, intensity: float, side: int):
-	trail.visible = true
-	trail.clear_points()
-	
-	var trail_length = min(intensity * 25.0, 100.0)
-	var base_direction = -velocity.normalized()
-	
-	# Create curved trail using velocity history
-	trail.add_point(to_local(wing_pos))
-	
-	for i in range(curved_trail_segments):
-		var t = float(i) / float(curved_trail_segments - 1)
-		var curve_offset = sin(t * PI) * side * 20.0 * (intensity / sharp_turn_threshold)
-		
-		var perpendicular = Vector2(-base_direction.y, base_direction.x)
-		var point = wing_pos + base_direction * trail_length * t + perpendicular * curve_offset
-		trail.add_point(to_local(point))
 
 # --- Movement Trail System ---
-func _update_movement_trail():
-	movement_trail_points.append(global_position)
-	if movement_trail_points.size() > max_movement_trail_points:
-		movement_trail_points.pop_front()
-	
-	movement_trail.visible = true
-	movement_trail.clear_points()
-	
-	# Add all points first
-	for point in movement_trail_points:
-		movement_trail.add_point(to_local(point))
+
 
 
 func _update_movement_particles():
@@ -373,50 +342,6 @@ func _create_arc_points(line: Line2D, radius: float, end_angle: float, segments:
 		line.add_point(point)
 
 
-func _update_dash_trail():
-	dash_trail_points.append(global_position)
-	if dash_trail_points.size() > max_trail_points:
-		dash_trail_points.pop_front()
-	
-	dash_trail.clear_points()
-	
-	# Add all points first
-	for point in dash_trail_points:
-		dash_trail.add_point(to_local(point))
-	
-	
-	
-func start_dash_trail_fade():
-	if dash_trail_active:
-		return
-		
-		
-	dash_trail_tween = create_tween()
-	dash_trail_tween.finished.connect(_on_dash_trail_fade_complete)
-	
-	dash_trail_active = true
-	# Tween the entire trail's modulate alpha from 1.0 to 0.0
-	dash_trail_tween.tween_property(dash_trail, "modulate:a", 0.0, dash_trail_fade_duration)
-
-func _on_dash_trail_fade_complete():
-	dash_trail.visible = false
-	dash_trail.modulate.a = 1.0  # Reset for next time
-	dash_trail_points.clear()
-	dash_trail_active = false
-
-
-
-# --- Rest of the original functions ---
-func _update_turn_effects(delta):
-	if turn_fx_timer > 0:
-		turn_fx_timer -= delta
-		var alpha = turn_fx_timer / turn_fx_duration
-		
-		turn_fx_left.default_color.a = alpha * 0.8
-		turn_fx_right.default_color.a = alpha * 0.8
-	else:
-		turn_fx_left.visible = false
-		turn_fx_right.visible = false
 
 func _update_reticle(delta):
 	reticle.global_position = target_position
@@ -470,3 +395,102 @@ func die():
 	death_tween.parallel().tween_property(sprite, "modulate", Color.TRANSPARENT, 0.5)
 	await death_tween.finished
 	queue_free()
+
+
+
+
+##### TRAILS
+## PLEASE CLEAN UP -- lots of shitty duplicated code... 
+
+
+func update_turn_trail_left():
+	turn_trail_points_left.append(global_position)
+	if turn_trail_points_left.size() > max_turn_trail_points:
+		turn_trail_points_left.pop_front()
+	
+	turn_fx_left.clear_points()
+	turn_fx_left.visible = true
+	
+	# Add all points
+	for point in turn_trail_points_left:
+		turn_fx_left.add_point(to_local(point))
+
+
+func update_turn_trail_right():
+	turn_trail_points_right.append(global_position)
+	if turn_trail_points_right.size() > max_turn_trail_points:
+		turn_trail_points_right.pop_front()
+	
+	turn_fx_right.clear_points()
+	turn_fx_right.visible = true
+	
+	# Add all points
+	for point in turn_trail_points_right:
+		turn_fx_right.add_point(to_local(point))
+
+
+func start_turn_trails_fade():
+	# Fade both trails
+	var left_tween = create_tween()
+	var right_tween = create_tween()
+	
+	left_tween.tween_property(turn_fx_left, "modulate:a", 0.0, turn_trail_fade_speed)
+	right_tween.tween_property(turn_fx_right, "modulate:a", 0.0, turn_trail_fade_speed)
+	
+	left_tween.finished.connect(_on_turn_trail_fade_complete.bind("left"))
+	right_tween.finished.connect(_on_turn_trail_fade_complete.bind("right"))
+
+func _on_turn_trail_fade_complete(side: String):
+	if side == "left":
+		turn_fx_left.visible = false
+		turn_fx_left.modulate.a = 1.0
+		turn_trail_points_left.clear()
+	else:
+		turn_fx_right.visible = false
+		turn_fx_right.modulate.a = 1.0
+		turn_trail_points_right.clear()
+
+
+
+
+func _update_dash_trail():
+	dash_trail_points.append(global_position)
+	if dash_trail_points.size() > max_trail_points:
+		dash_trail_points.pop_front()
+	
+	dash_trail.clear_points()
+	
+	# Add all points first
+	for point in dash_trail_points:
+		dash_trail.add_point(to_local(point))
+	
+	
+	
+func start_dash_trail_fade():
+	if dash_trail_active:
+		return
+	
+	dash_trail_tween = create_tween()
+	dash_trail_tween.finished.connect(_on_dash_trail_fade_complete)
+	
+	dash_trail_active = true
+	# Tween the entire trail's modulate alpha from 1.0 to 0.0
+	dash_trail_tween.tween_property(dash_trail, "modulate:a", 0.0, dash_trail_fade_duration)
+
+func _on_dash_trail_fade_complete():
+	dash_trail.visible = false
+	dash_trail.modulate.a = 1.0  # Reset for next time
+	dash_trail_points.clear()
+	dash_trail_active = false
+	
+func _update_movement_trail():
+	movement_trail_points.append(global_position)
+	if movement_trail_points.size() > max_movement_trail_points:
+		movement_trail_points.pop_front()
+	
+	movement_trail.visible = true
+	movement_trail.clear_points()
+	
+	# Add all points first
+	for point in movement_trail_points:
+		movement_trail.add_point(to_local(point))
