@@ -26,7 +26,7 @@ extends Node2D
 # --- Juice FX ---
 @export var hit_pause_duration := 0.08  # Hit pause duration
 @export var dash_bloom_intensity := 1.8
-@export var dash_trail_fade_speed := 5.0
+@export var dash_trail_fade_duration := 0.2
 @export var idle_pulse_speed := 2.0
 @export var dash_dial_radius := 40.0  # Distance from player center
 
@@ -50,7 +50,9 @@ var velocity_history: Array[Vector2] = []  # For curved trails
 var dash_trail_points: Array = []
 var max_trail_points := 15
 var movement_trail_points: Array = []
-var max_movement_trail_points := 6
+var max_movement_trail_points := 20
+var dash_trail_tween: Tween
+var dash_trail_active = false
 
 # --- Nodes ---
 @onready var sprite: Sprite2D = $Sprite2D
@@ -76,14 +78,14 @@ func _ready():
 	reticle.modulate.a = 0.5
 	collision_area.connect("body_entered", _on_body_entered)
 	emit_signal("hp_changed", current_hp)
-	last_rotation = sprite.rotation
+	last_rotation = rotation
 	
 	# Setup all visual systems
 	_setup_turn_fx()
-	_setup_dash_trail()
-	_setup_movement_trail()
+	#_setup_movement_trail()
 	_setup_dash_dial()
-	_setup_particles()
+	
+
 
 func _setup_turn_fx():
 	# Left wing trail with curve support
@@ -96,15 +98,11 @@ func _setup_turn_fx():
 	turn_fx_right.default_color = Color(0.3, 0.8, 1.0, 0.0)
 	turn_fx_right.visible = false
 
-func _setup_dash_trail():
-	dash_trail.width = 6.0
-	dash_trail.default_color = Color(1.0, 0.8, 0.3, 1.0)
-	dash_trail.visible = false
 
 func _setup_movement_trail():
 	movement_trail.width = 2.0
-	movement_trail.default_color = Color(0.6, 0.9, 1.0, 0.4)
-	movement_trail.visible = false
+	movement_trail.default_color = Color(1.0, 1.0, 1.0, 0.7)
+	movement_trail.visible = true
 
 func _setup_dash_dial():
 	# Background circle (full circle)
@@ -116,18 +114,7 @@ func _setup_dash_dial():
 	dash_dial.width = 4.0
 	dash_dial.default_color = Color(0.2, 0.8, 1.0, 0.8)
 
-func _setup_particles():
-	# Movement particles for constant motion feedback
-	if movement_particles:
-		movement_particles.emitting = false
-		movement_particles.amount = 20
-		movement_particles.lifetime = 0.8
-		
-	# Idle pulse particles for "alive" feeling
-	if idle_pulse_particles:
-		idle_pulse_particles.emitting = true
-		idle_pulse_particles.amount = 8
-		idle_pulse_particles.lifetime = 2.0
+
 
 func _process(delta):
 	if is_hit_paused:
@@ -150,7 +137,7 @@ func _process(delta):
 		_handle_mouse_input()
 		_apply_momentum_movement(delta)
 		dash_cooldown_timer = max(dash_cooldown_timer - delta, 0.0)
-		_fade_dash_trail(delta)
+		
 		_update_movement_trail()
 		_update_movement_particles()
 
@@ -158,7 +145,7 @@ func _process(delta):
 	_update_turn_effects(delta)
 	_update_reticle(delta)
 	_update_dash_dial()
-	_update_idle_pulse(delta)
+	#_update_idle_pulse(delta)
 	emit_signal("dash_cooldown_updated", _get_dash_percent_ready())
 
 func _input(event):
@@ -220,7 +207,7 @@ func _handle_dash_movement(delta):
 		current_speed *= dash_start_boost
 	
 	global_position += dash_direction * current_speed * delta
-	sprite.rotation = dash_direction.angle()
+	rotation = dash_direction.angle()
 
 func end_dash():
 	is_dashing = false
@@ -238,6 +225,8 @@ func end_dash():
 	
 	# Add velocity for smooth transition
 	velocity += dash_direction * 200.0
+
+	start_dash_trail_fade()
 
 # --- Enhanced Movement System ---
 func _handle_mouse_input():
@@ -281,22 +270,22 @@ func _handle_circling_movement(delta):
 func _handle_rotation_and_turns(delta):
 	if velocity.length() > 10.0:
 		var target_rotation = velocity.angle()
-		sprite.rotation = lerp_angle(sprite.rotation, target_rotation, turn_rate * delta)
+		rotation = lerp_angle(rotation, target_rotation, turn_rate * delta)
 		
-		var rotation_change = abs(angle_difference(sprite.rotation, last_rotation))
+		var rotation_change = abs(angle_difference(rotation, last_rotation))
 		var turn_speed = rotation_change / delta
 		
 		if turn_speed > sharp_turn_threshold:
 			_trigger_curved_turn_effects(turn_speed)
 		
-		last_rotation = sprite.rotation
+		last_rotation = rotation
 
 # --- Enhanced Turn Effects with Curves ---
 func _trigger_curved_turn_effects(turn_intensity: float):
 	turn_fx_timer = turn_fx_duration
 	
 	var wing_offset = 25.0
-	var wing_direction = Vector2(cos(sprite.rotation + PI/2), sin(sprite.rotation + PI/2))
+	var wing_direction = Vector2(cos(rotation + PI/2), sin(rotation + PI/2))
 	
 	# Create curved trails based on velocity history
 	var left_wing_pos = global_position - wing_direction * wing_offset
@@ -325,22 +314,17 @@ func _create_curved_wing_trail(trail: Line2D, wing_pos: Vector2, intensity: floa
 
 # --- Movement Trail System ---
 func _update_movement_trail():
-	if velocity.length() > 20.0:  # Only show trail when moving
-		movement_trail_points.append(global_position)
-		if movement_trail_points.size() > max_movement_trail_points:
-			movement_trail_points.pop_front()
-		
-		movement_trail.visible = true
-		movement_trail.clear_points()
-		
-		for i in range(movement_trail_points.size()):
-			var alpha = float(i) / float(movement_trail_points.size())
-			movement_trail.add_point(to_local(movement_trail_points[i]))
-			# Fade trail points
-			movement_trail.default_color.a = 0.4 * alpha
-	else:
-		movement_trail.visible = false
-		movement_trail_points.clear()
+	movement_trail_points.append(global_position)
+	if movement_trail_points.size() > max_movement_trail_points:
+		movement_trail_points.pop_front()
+	
+	movement_trail.visible = true
+	movement_trail.clear_points()
+	
+	# Add all points first
+	for point in movement_trail_points:
+		movement_trail.add_point(to_local(point))
+
 
 func _update_movement_particles():
 	if movement_particles:
@@ -388,45 +372,39 @@ func _create_arc_points(line: Line2D, radius: float, end_angle: float, segments:
 		var point = Vector2(cos(angle), sin(angle)) * radius
 		line.add_point(point)
 
-# --- Idle Pulse Effect ---
-func _update_idle_pulse(delta):
-	if idle_pulse_particles and velocity.length() < 10.0:  # Only when mostly idle
-		var t = Time.get_ticks_msec() / 1000.0
-		var pulse = sin(t * idle_pulse_speed) * 0.3 + 0.7
-		idle_pulse_particles.scale_amount_min = pulse
-		idle_pulse_particles.scale_amount_max = pulse * 1.2
-		
-		# Subtle sprite pulse when idle
-		sprite.scale = Vector2.ONE * (1.0 + pulse * 0.05)
 
-# --- Enhanced Dash Trail ---
 func _update_dash_trail():
 	dash_trail_points.append(global_position)
 	if dash_trail_points.size() > max_trail_points:
 		dash_trail_points.pop_front()
 	
 	dash_trail.clear_points()
-	for i in range(dash_trail_points.size()):
-		var alpha = float(i) / float(dash_trail_points.size())
-		dash_trail.add_point(to_local(dash_trail_points[i]))
-		# Create width variation for more dynamic trail
-		dash_trail.width = 6.0 * alpha
-
-func _fade_dash_trail(delta):
-	if dash_trail_points.size() > 0:
-		# Faster fade out
-		var remove_count = int(dash_trail_fade_speed * delta)
-		for i in range(remove_count):
-			if dash_trail_points.size() > 0:
-				dash_trail_points.pop_front()
+	
+	# Add all points first
+	for point in dash_trail_points:
+		dash_trail.add_point(to_local(point))
+	
+	
+	
+func start_dash_trail_fade():
+	if dash_trail_active:
+		return
 		
-		if dash_trail_points.size() > 0:
-			dash_trail.clear_points()
-			for i in range(dash_trail_points.size()):
-				var alpha = float(i) / float(dash_trail_points.size())
-				dash_trail.add_point(to_local(dash_trail_points[i]))
-		else:
-			dash_trail.visible = false
+		
+	dash_trail_tween = create_tween()
+	dash_trail_tween.finished.connect(_on_dash_trail_fade_complete)
+	
+	dash_trail_active = true
+	# Tween the entire trail's modulate alpha from 1.0 to 0.0
+	dash_trail_tween.tween_property(dash_trail, "modulate:a", 0.0, dash_trail_fade_duration)
+
+func _on_dash_trail_fade_complete():
+	dash_trail.visible = false
+	dash_trail.modulate.a = 1.0  # Reset for next time
+	dash_trail_points.clear()
+	dash_trail_active = false
+
+
 
 # --- Rest of the original functions ---
 func _update_turn_effects(delta):
