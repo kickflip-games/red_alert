@@ -77,6 +77,7 @@ var turn_trail_fade_speed = 1.0  # Adjust fade speed
 # --- Signals ---
 signal hp_changed(current_hp: int)
 signal dash_cooldown_updated(percent_ready: float)
+signal player_died
 
 func _ready():
 	target_position = global_position
@@ -271,7 +272,6 @@ func _handle_rotation_and_turns(delta):
 		var turn_speed = rotation_change / delta
 		
 		if turn_speed > sharp_turn_threshold:
-			print("SHARP TURN")
 			if !is_sharp_turning:
 				# Just started sharp turning - reset trails
 				is_sharp_turning = true
@@ -390,10 +390,13 @@ func become_invincible():
 func die():
 	print("Player has died")
 	# Death effect before destruction
+	player_died.emit()
+	
 	var death_tween = create_tween()
 	death_tween.parallel().tween_property(sprite, "scale", Vector2.ZERO, 0.5)
 	death_tween.parallel().tween_property(sprite, "modulate", Color.TRANSPARENT, 0.5)
 	await death_tween.finished
+	
 	queue_free()
 
 

@@ -23,6 +23,10 @@ CameraBounds="*res://autoloads/CameraBounds.gd"
 
 window/stretch/mode="viewport"
 
+[global_group]
+
+player=""
+
 [input]
 
 dash={

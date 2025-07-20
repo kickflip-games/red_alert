@@ -1,12 +1,15 @@
-[gd_scene load_steps=11 format=3 uid="uid://c7etnmicu136n"]
+[gd_scene load_steps=14 format=3 uid="uid://c7etnmicu136n"]
 
 [ext_resource type="PackedScene" uid="uid://dsmsb7kwv0ce1" path="res://managers/camera_2d.tscn" id="1_c01mt"]
+[ext_resource type="Script" uid="uid://cfeicvpmqto3f" path="res://scenes/main.gd" id="1_jlsqs"]
 [ext_resource type="PackedScene" uid="uid://bulqqx1t7sun1" path="res://scenes/background/Background.tscn" id="1_nxtc6"]
 [ext_resource type="PackedScene" uid="uid://corxhrleskgv" path="res://scenes/player/Player.tscn" id="3_c01mt"]
 [ext_resource type="PackedScene" uid="uid://ba4erv8r40yb3" path="res://managers/AttackManager.tscn" id="4_nxtc6"]
 [ext_resource type="PackedScene" uid="uid://bib5lohuq1xli" path="res://scenes/ui/HUD.tscn" id="4_rarhs"]
 [ext_resource type="Texture2D" uid="uid://blmdh84m208op" path="res://assets/textures/heart/heart_full.png" id="5_c01mt"]
 [ext_resource type="Texture2D" uid="uid://48kbqnmj1mpn" path="res://assets/textures/heart/heart_empty.png" id="6_nxtc6"]
+[ext_resource type="PackedScene" uid="uid://dr4kpqmlw8l01" path="res://scenes/attacks/missile/missile_spawner.tscn" id="9_q8u5g"]
+[ext_resource type="PackedScene" uid="uid://bn6x8ju2cxxth" path="res://scenes/attacks/missile/homing_missile.tscn" id="10_lhr70"]
 
 [sub_resource type="Environment" id="Environment_nxtc6"]
 glow_enabled = true
@@ -19,6 +22,7 @@ glow_hdr_threshold = 0.83
 [sub_resource type="Compositor" id="Compositor_q8u5g"]
 
 [node name="Main" type="Node2D"]
+script = ExtResource("1_jlsqs")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_nxtc6")
@@ -36,27 +40,18 @@ position = Vector2(576, 322)
 
 [node name="Player" parent="." instance=ExtResource("3_c01mt")]
 position = Vector2(586, 276)
-acceleration = null
-max_speed = null
-drag = null
-turn_rate = null
-dash_speed = null
-dash_duration = null
-dash_cooldown = null
-dash_start_boost = null
-max_hp = null
-invincibility_duration = null
-circle_radius = null
-circle_speed = null
-circle_orbit_radius = null
-sharp_turn_threshold = null
-turn_fx_duration = null
 
-[node name="AttackManager" parent="." instance=ExtResource("4_nxtc6")]
+[node name="AttackManager" parent="." node_paths=PackedStringArray("hud") instance=ExtResource("4_nxtc6")]
+hud = NodePath("../HUD")
 
 [node name="HUD" parent="." node_paths=PackedStringArray("player") instance=ExtResource("4_rarhs")]
 player = NodePath("../Player")
 heart_full_texture = ExtResource("5_c01mt")
 heart_empty_texture = ExtResource("6_nxtc6")
+
+[node name="MissileSpawner" parent="." instance=ExtResource("9_q8u5g")]
+position = Vector2(577, 647)
+missile_scene = ExtResource("10_lhr70")
+spawn_radius = 1000.0
 
 [editable path="Background"]

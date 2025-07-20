@@ -7,11 +7,13 @@ signal attack_spawned(attack_type: String, time: float)
 signal phase_changed(new_phase: int)
 
 var game_timer: float = 0.0
-var game_duration: float = 120.0
+var game_duration: float = 100.0
 var current_attack_index: int = 0
 var is_game_active: bool = false
 var current_phase: int = 1
 var active_attacks: Array[Node] = []
+
+@export var  hud: HUD
 
 # Difficulty scaling parameters
 var difficulty_multiplier: float = 1.0
@@ -21,7 +23,7 @@ var base_spawn_rate: float = 1.0
 var attack_timeline = [
 	# PHASE 1: Introduction (0-30s) - Simple horizontal and vertical streams
 	{"time": 2.0, "type": "bullet_stream", "params": {"start_pos": Vector2(-50, 200), "direction": Vector2(1, 0), "speed": 150}},
-	{"time": 6.0, "type": "bullet_stream", "params": {"start_pos": Vector2(-50, 400), "direction": Vector2(1, 0), "speed": 150}},
+	{"time": 6.0, "type": "bullet_stream", "params": {"start_pos": Vector2(50, 400), "direction": Vector2(-1, 0), "speed": 150}},
 	{"time": 10.0, "type": "bullet_stream", "params": {"start_pos": Vector2(600, -50), "direction": Vector2(0, 1), "speed": 160}},
 	{"time": 14.0, "type": "bullet_stream", "params": {"start_pos": Vector2(650, 300), "direction": Vector2(-1, 0), "speed": 160}},
 	{"time": 18.0, "type": "bullet_stream", "params": {"start_pos": Vector2(-50, 300), "direction": Vector2(1, 0.3), "speed": 170}},
@@ -113,7 +115,7 @@ var phases = [
 ]
 
 func _ready():
-	start_game()
+	#start_game()
 	# Connect to attack cleanup
 	connect_attack_cleanup()
 
@@ -146,6 +148,8 @@ func _process(delta):
 	# Check for game completion
 	if game_timer >= game_duration:
 		complete_game()
+		
+	hud.update_timer(int(game_timer), int(game_duration))
 
 func update_game_phase():
 	var new_phase = get_current_phase()

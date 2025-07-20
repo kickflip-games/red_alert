@@ -1,56 +1,177 @@
-[gd_scene load_steps=3 format=3 uid="uid://bib5lohuq1xli"]
+[gd_scene load_steps=8 format=3 uid="uid://bib5lohuq1xli"]
 
 [ext_resource type="Script" uid="uid://ct0mjkwg5mxy8" path="res://scenes/ui/HUD.gd" id="1_r8hcy"]
 [ext_resource type="Texture2D" uid="uid://blmdh84m208op" path="res://assets/textures/heart/heart_full.png" id="2_atyv1"]
+[ext_resource type="Texture2D" uid="uid://1r7uxcup4ew3" path="res://assets/textures/logo.png" id="3_6ll6g"]
+[ext_resource type="FontFile" uid="uid://b61dtuoni8re8" path="res://assets/fonts/game_font.ttf" id="4_ig75s"]
+
+[sub_resource type="Theme" id="Theme_atyv1"]
+
+[sub_resource type="Theme" id="Theme_4ed8p"]
+
+[sub_resource type="Theme" id="Theme_ig75s"]
+Button/fonts/font = ExtResource("4_ig75s")
+RichTextLabel/fonts/normal_font = ExtResource("4_ig75s")
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_r8hcy")
 
-[node name="PlayerUi" type="Panel" parent="."]
+[node name="GameUi" type="Control" parent="."]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = -567.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_atyv1")
 
-[node name="Hearts" type="HBoxContainer" parent="PlayerUi"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -101.0
-offset_top = -35.0
-offset_right = 92.0
-grow_horizontal = 2
-grow_vertical = 0
-alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="PlayerUi/Hearts"]
-layout_mode = 2
-texture = ExtResource("2_atyv1")
-
-[node name="TextureRect2" type="TextureRect" parent="PlayerUi/Hearts"]
-layout_mode = 2
-texture = ExtResource("2_atyv1")
-
-[node name="TextureRect3" type="TextureRect" parent="PlayerUi/Hearts"]
-layout_mode = 2
-texture = ExtResource("2_atyv1")
-
-[node name="DashCooldownBar" type="ProgressBar" parent="PlayerUi"]
+[node name="Hearts" type="HBoxContainer" parent="GameUi"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -162.0
-offset_right = 180.0
-offset_bottom = 27.0
+offset_left = -128.5
+offset_top = 17.97
+offset_right = 128.5
+offset_bottom = 100.97
 grow_horizontal = 2
+alignment = 1
 
-[node name="HPLabel" type="Label" parent="PlayerUi"]
+[node name="TextureRect" type="TextureRect" parent="GameUi/Hearts"]
+layout_mode = 2
+texture = ExtResource("2_atyv1")
+expand_mode = 2
+flip_h = true
+
+[node name="TextureRect2" type="TextureRect" parent="GameUi/Hearts"]
+layout_mode = 2
+texture = ExtResource("2_atyv1")
+expand_mode = 2
+
+[node name="TextureRect3" type="TextureRect" parent="GameUi/Hearts"]
+layout_mode = 2
+texture = ExtResource("2_atyv1")
+expand_mode = 2
+
+[node name="DashCooldownBar" type="ProgressBar" parent="GameUi"]
+visible = false
+modulate = Color(1, 1, 1, 0)
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+
+[node name="HPLabel" type="Label" parent="GameUi"]
+visible = false
+layout_mode = 0
+offset_top = 29.0
+offset_right = 1152.0
+offset_bottom = 52.0
+
+[node name="TimerLabel" type="RichTextLabel" parent="GameUi"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -111.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = SubResource("Theme_4ed8p")
+theme_override_fonts/normal_font = ExtResource("4_ig75s")
+theme_override_font_sizes/normal_font_size = 100
+text = "100/100 seconds"
+horizontal_alignment = 1
+
+[node name="StartScreen" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StartButton" type="Button" parent="StartScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Logo" type="TextureRect" parent="StartScreen"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -312.0
+offset_top = 4.0
+offset_right = 348.62415
+offset_bottom = 443.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("3_6ll6g")
+expand_mode = 1
+
+[node name="RichTextLabel" type="RichTextLabel" parent="StartScreen"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -201.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_fonts/normal_font = ExtResource("4_ig75s")
+theme_override_font_sizes/normal_font_size = 50
+text = "Mouse to move
+Click to dash
+SURVIVE 100 SECONDS
+
+"
+fit_content = true
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="EndScreen" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="EndScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="RestartButton" type="Button" parent="EndScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_ig75s")
+theme_override_font_sizes/font_size = 57
+text = "Click to restart
+"
+
+[node name="GameTxt" type="RichTextLabel" parent="EndScreen"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 202.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_fonts/normal_font = ExtResource("4_ig75s")
+theme_override_font_sizes/normal_font_size = 90
+text = "GAME OVER
+"
+horizontal_alignment = 1

@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3 uid="uid://bn6x8ju2cxxth"]
+
+[ext_resource type="Script" uid="uid://ogg6bll42xhn" path="res://scenes/attacks/missile/homing_missile.gd" id="1_51g4w"]
+[ext_resource type="Texture2D" uid="uid://6v3e4dnf5qxc" path="res://assets/textures/projectiles/bomb.png" id="1_2237u"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2sou5"]
+size = Vector2(10, 6)
+
+[sub_resource type="Curve" id="Curve_51g4w"]
+_data = [Vector2(0.02996254, 0), 0.0, 0.9589364, 0, 0, Vector2(0.99250937, 0.97495174), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_51g4w"]
+offsets = PackedFloat32Array(0.0023094688, 1)
+colors = PackedColorArray(1, 1, 0, 1, 1, 1, 0, 0)
+
+[node name="HomingMissile" type="CharacterBody2D"]
+collision_mask = 2
+script = ExtResource("1_51g4w")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_2sou5")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(-4.7683716e-07, 0)
+scale = Vector2(2.3750002, 2.375)
+texture = ExtResource("1_2237u")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_2sou5")
+
+[node name="Trail" type="Line2D" parent="."]
+z_index = -1
+points = PackedVector2Array(0, 0, -35.82, 0)
+width = 12.47
+width_curve = SubResource("Curve_51g4w")
+gradient = SubResource("Gradient_51g4w")
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
