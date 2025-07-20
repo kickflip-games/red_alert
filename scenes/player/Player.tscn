@@ -1,11 +1,57 @@
-[gd_scene load_steps=6 format=3 uid="uid://corxhrleskgv"]
+[gd_scene load_steps=15 format=3 uid="uid://corxhrleskgv"]
 
 [ext_resource type="Script" uid="uid://ct2s5gu2mvdyu" path="res://scenes/player/Player.gd" id="1_p0vlq"]
 [ext_resource type="Texture2D" uid="uid://dnj15kqmp5xsi" path="res://assets/textures/ship.png" id="2_4kuee"]
 [ext_resource type="Texture2D" uid="uid://cyedncb0hj8an" path="res://assets/textures/crosshair102.png" id="2_gfjak"]
+[ext_resource type="Texture2D" uid="uid://cug8ieqscrkf" path="res://assets/textures/smoke/no_border/smoke.png" id="4_524rm"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4kuee"]
 radius = 4.0
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_524rm"]
+particles_animation = true
+particles_anim_h_frames = 3
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tpg5x"]
+atlas = ExtResource("4_524rm")
+region = Rect2(0, 0, 308, 123)
+filter_clip = true
+
+[sub_resource type="Curve" id="Curve_524rm"]
+_data = [Vector2(0, 0.98683333), 0.0, 0.0, 0, 0, Vector2(0.85160434, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_tpg5x"]
+curve = SubResource("Curve_524rm")
+
+[sub_resource type="Curve" id="Curve_v42im"]
+_data = [Vector2(0, 0.90344375), 0.0, -0.13678843, 0, 0, Vector2(0.14572194, 0.9370922), 0.0, 0.0, 0, 0, Vector2(0.48930487, 0.7454424), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_pn6s4"]
+curve = SubResource("Curve_v42im")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_4kuee"]
+particle_flag_disable_z = true
+emission_shape_scale = Vector3(5.81, 8.57, 1)
+emission_shape = 3
+emission_box_extents = Vector3(1, 1, 1)
+angle_min = -360.0
+angle_max = 360.00003
+initial_velocity_min = -1.0
+initial_velocity_max = 1.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.049999997
+scale_max = 0.099999994
+scale_curve = SubResource("CurveTexture_pn6s4")
+alpha_curve = SubResource("CurveTexture_tpg5x")
+anim_offset_max = 1.0
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_524rm"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 98, 0)
 
 [sub_resource type="Curve" id="Curve_4kuee"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.99053025, 0), 0.0, 0.0, 0, 0]
@@ -15,7 +61,6 @@ point_count = 2
 script = ExtResource("1_p0vlq")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-rotation = 1.5707964
 texture = ExtResource("2_4kuee")
 
 [node name="Reticle" type="Sprite2D" parent="."]
@@ -29,21 +74,50 @@ collision_layer = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionArea"]
 shape = SubResource("CircleShape2D_4kuee")
 
+[node name="MovementParticles" type="GPUParticles2D" parent="."]
+material = SubResource("CanvasItemMaterial_524rm")
+position = Vector2(-10, 0)
+amount = 10
+texture = SubResource("AtlasTexture_tpg5x")
+lifetime = 2.0
+randomness = 0.5
+process_material = SubResource("ParticleProcessMaterial_4kuee")
+
 [node name="DashParticles" type="GPUParticles2D" parent="."]
+process_material = SubResource("ParticleProcessMaterial_524rm")
+
+[node name="IdlePulseParticles" type="GPUParticles2D" parent="."]
+process_material = SubResource("ParticleProcessMaterial_524rm")
+
+[node name="MovementTrail" type="Line2D" parent="."]
+position = Vector2(0, -8)
+points = PackedVector2Array(0, 0, 0, 0)
+width = 5.0
+width_curve = SubResource("Curve_4kuee")
 
 [node name="TurnFXLeft" type="Line2D" parent="."]
 position = Vector2(0, -8)
-points = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+points = PackedVector2Array(0, 0, 0, 0)
 width = 5.0
 width_curve = SubResource("Curve_4kuee")
 
 [node name="TurnFXRight" type="Line2D" parent="."]
 position = Vector2(0, 9)
-points = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+points = PackedVector2Array(0, 0, 0, 0)
 width = 5.0
 width_curve = SubResource("Curve_4kuee")
 
 [node name="DashTrail" type="Line2D" parent="."]
-points = PackedVector2Array(0, 0, -43.44, 0, 0, 0, 0, 0, 0, 0)
+points = PackedVector2Array(0, 0, 0, 0)
+width_curve = SubResource("Curve_4kuee")
+default_color = Color(0, 0, 0, 1)
+
+[node name="DashDial" type="Line2D" parent="."]
+points = PackedVector2Array(0, 0, 0, 0)
+width_curve = SubResource("Curve_4kuee")
+default_color = Color(0, 0, 0, 1)
+
+[node name="DashDialBG" type="Line2D" parent="."]
+points = PackedVector2Array(0, 0, 0, 0)
 width_curve = SubResource("Curve_4kuee")
 default_color = Color(0, 0, 0, 1)
