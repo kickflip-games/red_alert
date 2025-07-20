@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://bulqqx1t7sun1"]
+
+[ext_resource type="Shader" uid="uid://dyspfhf2ehwfn" path="res://scenes/background/clouds.gdshader" id="1_h188h"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ad7sm"]
+shader = ExtResource("1_h188h")
+shader_parameter/transparency = 0.158000007505
+shader_parameter/color0 = Color(0.01, 0, 1, 1)
+shader_parameter/color1 = Color(0.32, 0.2, 1, 1)
+shader_parameter/color2 = Color(0.34, 0.41, 1, 1)
+shader_parameter/color3 = Color(0.39, 0.52, 1, 1)
+shader_parameter/Direction = Vector2(0, 1)
+shader_parameter/Speed = 30.0
+shader_parameter/threshold1 = 0.6
+shader_parameter/threshold2 = 0.66
+shader_parameter/threshold3 = 0.75
+shader_parameter/edge_smoothness = 0.019000000203980003
+shader_parameter/color_blend = 0.3
+shader_parameter/OCTAVE = 6
+shader_parameter/pixel_size = 128
+shader_parameter/dithering = 2.5
+
+[node name="Background" type="ColorRect"]
+material = SubResource("ShaderMaterial_ad7sm")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -26.0
+offset_top = -39.0
+offset_right = -3.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2

@@ -85,7 +85,7 @@ func spawn_bullets():
 		var bullet = bullet_scene.instantiate()
 		get_parent().add_child(bullet)
 
-		var pos = start_position + direction * (i * bullet_spacing)
+		var pos = start_position + direction * (-i * bullet_spacing)
 		bullet.global_position = pos
 		bullet.rotation = direction.angle()
 		bullet.linear_velocity = direction * bullet_speed

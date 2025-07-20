@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://c7etnmicu136n"]
+[gd_scene load_steps=8 format=3 uid="uid://c7etnmicu136n"]
 
 [ext_resource type="PackedScene" uid="uid://dsmsb7kwv0ce1" path="res://managers/camera_2d.tscn" id="1_c01mt"]
+[ext_resource type="PackedScene" uid="uid://bulqqx1t7sun1" path="res://scenes/background/Background.tscn" id="1_nxtc6"]
 [ext_resource type="PackedScene" uid="uid://corxhrleskgv" path="res://scenes/player/Player.tscn" id="3_c01mt"]
 [ext_resource type="PackedScene" uid="uid://ba4erv8r40yb3" path="res://managers/AttackManager.tscn" id="4_nxtc6"]
 [ext_resource type="PackedScene" uid="uid://bib5lohuq1xli" path="res://scenes/ui/HUD.tscn" id="4_rarhs"]
@@ -8,6 +9,12 @@
 [ext_resource type="Texture2D" uid="uid://48kbqnmj1mpn" path="res://assets/textures/heart/heart_empty.png" id="6_nxtc6"]
 
 [node name="Main" type="Node2D"]
+
+[node name="Background" parent="." instance=ExtResource("1_nxtc6")]
+offset_left = -60.0
+offset_top = -84.0
+offset_right = 1207.0
+offset_bottom = 709.0
 
 [node name="Camera2D" parent="." instance=ExtResource("1_c01mt")]
 position = Vector2(576, 322)
@@ -20,3 +27,5 @@ position = Vector2(576, 322)
 player = NodePath("../Player")
 heart_full_texture = ExtResource("5_c01mt")
 heart_empty_texture = ExtResource("6_nxtc6")
+
+[editable path="Background"]
