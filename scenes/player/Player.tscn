@@ -24,6 +24,7 @@ scale = Vector2(0.228, 0.228)
 texture = ExtResource("2_gfjak")
 
 [node name="CollisionArea" type="Area2D" parent="."]
+collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionArea"]
 shape = SubResource("CircleShape2D_4kuee")
@@ -43,6 +44,6 @@ width = 5.0
 width_curve = SubResource("Curve_4kuee")
 
 [node name="DashTrail" type="Line2D" parent="."]
-points = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+points = PackedVector2Array(0, 0, -43.44, 0, 0, 0, 0, 0, 0, 0)
 width_curve = SubResource("Curve_4kuee")
-default_color = Color(0.61960787, 1, 1, 1)
+default_color = Color(0, 0, 0, 1)

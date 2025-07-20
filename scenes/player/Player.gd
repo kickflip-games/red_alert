@@ -11,6 +11,7 @@ extends Node2D
 @export var dash_cooldown := 1.5
 @export var dash_start_boost := 1.5
 @export var max_hp := 3
+@export var invincibility_duration: float = 1.2 # Cooldown in seconds
 
 # --- Circling behavior ---
 @export var circle_radius := 80.0        # How close before circling starts
@@ -26,6 +27,7 @@ var velocity := Vector2.ZERO
 var current_hp := max_hp
 var is_dashing := false
 var is_circling := false
+var is_invincible := false
 var circle_angle := 0.0
 var last_rotation := 0.0
 var turn_fx_timer := 0.0
@@ -33,6 +35,8 @@ var dash_timer := 0.0
 var dash_cooldown_timer := 0.0
 var dash_direction := Vector2.ZERO
 var target_position := Vector2.ZERO
+
+
 
 # --- Trail system ---
 var dash_trail_points: Array = []
@@ -55,7 +59,7 @@ func _ready():
 	target_position = global_position
 	reticle.visible = true
 	reticle.modulate.a = 0.5
-	collision_area.connect("area_entered", _on_area_entered)
+	collision_area.connect("body_entered", _on_body_entered)
 	emit_signal("hp_changed", current_hp)
 	last_rotation = sprite.rotation
 	
@@ -244,7 +248,7 @@ func _update_dash_trail():
 	if dash_trail_points.size() > max_trail_points:
 		dash_trail_points.pop_front()
 	
-	dash_trail.clear_points()
+	#dash_trail.clear_points()
 	for i in range(dash_trail_points.size()):
 		var alpha = float(i) / float(dash_trail_points.size())
 		dash_trail.add_point(to_local(dash_trail_points[i]))
@@ -272,23 +276,48 @@ func _get_dash_percent_ready() -> float:
 	return clamp(1.0 - dash_cooldown_timer / dash_cooldown, 0.0, 1.0)
 
 # --- Collision & Damage ---
-func _on_area_entered(area: Area2D):
-	if is_dashing:
+func _on_body_entered(body: Node2D):
+	# Optional: Check if the body that hit you is actually a bullet
+	#if not body.is_in_group("bullets"):
+		#return
+
+	print("Body entered: ", body.name)
+	if is_dashing or is_invincible:
 		return
+	
 	take_damage(1)
+	body.queue_free() # Destroy the bullet after it hits
 
 func take_damage(amount: int):
+	# This function is now only called when we are certain the player can take damage.
 	current_hp -= amount
 	emit_signal("hp_changed", current_hp)
 	print("Took damage! HP = ", current_hp)
 
-	sprite.modulate = Color(1, 0.3, 0.3, 1.0)
-	await get_tree().create_timer(0.1).timeout
-	if not is_dashing:
-		sprite.modulate = Color(1, 1, 1, 1.0)
-
 	if current_hp <= 0:
 		die()
+	else:
+		# Become invincible if not dead
+		become_invincible()
+
+# This new function handles the invincibility logic
+func become_invincible():
+	is_invincible = true
+	
+	# --- Visual Feedback: Flashing Sprite ---
+	var tween = create_tween().set_loops(4) # Loop 4 times for a good flashing duration
+	tween.set_trans(Tween.TRANS_SINE) # Makes the fade in/out smooth
+	tween.tween_property(sprite, "modulate:a", 0.4, invincibility_duration / 8)
+	tween.tween_property(sprite, "modulate:a", 1.0, invincibility_duration / 8)
+
+	# --- Cooldown Timer ---
+	# Wait for the invincibility duration to pass
+	await get_tree().create_timer(invincibility_duration).timeout
+	
+	# --- End of Invincibility ---
+	is_invincible = false
+	print("Player is no longer invincible.")
+	
 
 func die():
 	print("Player has died")

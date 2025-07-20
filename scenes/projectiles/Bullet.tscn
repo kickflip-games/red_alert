@@ -1,23 +1,22 @@
-[gd_scene load_steps=5 format=3 uid="uid://bhgqp6tofyulb"]
+[gd_scene load_steps=4 format=3 uid="uid://bhgqp6tofyulb"]
 
 [ext_resource type="Script" uid="uid://dhkllrxayug06" path="res://scenes/projectiles/Bullet.gd" id="1_ci251"]
-[ext_resource type="Texture2D" uid="uid://bm4fkgrdxkiwd" path="res://assets/textures/tiles_packed.png" id="2_36ope"]
+[ext_resource type="Texture2D" uid="uid://dupx7t3xyukvh" path="res://assets/textures/projectiles/bullet.png" id="2_36ope"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ci251"]
-size = Vector2(6, 16)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_kghso"]
-atlas = ExtResource("2_36ope")
-region = Rect2(5, 0, 6, 16.25)
+size = Vector2(26, 6)
 
 [node name="Bullet" type="RigidBody2D"]
+collision_mask = 2
 script = ExtResource("1_ci251")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_ci251")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = SubResource("AtlasTexture_kghso")
+scale = Vector2(1.6562501, 1.6562501)
+texture = ExtResource("2_36ope")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
-rect = Rect2(-3, -8, 6, 16)
+position = Vector2(15, 1)
+rect = Rect2(-28, -4, 26, 6)
