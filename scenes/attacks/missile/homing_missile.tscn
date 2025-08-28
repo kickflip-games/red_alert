@@ -14,7 +14,7 @@ point_count = 2
 offsets = PackedFloat32Array(0.0023094688, 1)
 colors = PackedColorArray(1, 1, 0, 1, 1, 1, 0, 0)
 
-[node name="HomingMissile" type="CharacterBody2D"]
+[node name="HomingMissile" type="CharacterBody2D" groups=["missiles"]]
 collision_mask = 2
 script = ExtResource("1_51g4w")
 

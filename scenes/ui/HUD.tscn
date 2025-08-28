@@ -80,6 +80,12 @@ theme_override_font_sizes/normal_font_size = 100
 text = "100/100 seconds"
 horizontal_alignment = 1
 
+[node name="WaveDebugLabel" type="Label" parent="GameUi"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Wavename"
+
 [node name="StartScreen" type="Control" parent="."]
 visible = false
 layout_mode = 3

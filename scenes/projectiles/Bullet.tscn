@@ -1,13 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://bhgqp6tofyulb"]
+[gd_scene load_steps=5 format=3 uid="uid://bhgqp6tofyulb"]
 
 [ext_resource type="Script" uid="uid://dhkllrxayug06" path="res://scenes/projectiles/Bullet.gd" id="1_ci251"]
 [ext_resource type="Texture2D" uid="uid://dupx7t3xyukvh" path="res://assets/textures/projectiles/bullet.png" id="2_36ope"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_36ope"]
+friction = 0.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ci251"]
 size = Vector2(26, 6)
 
 [node name="Bullet" type="RigidBody2D"]
 collision_mask = 2
+physics_material_override = SubResource("PhysicsMaterial_36ope")
 script = ExtResource("1_ci251")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

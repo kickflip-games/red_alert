@@ -19,7 +19,8 @@ var is_timer_running: bool = false
 @onready var restart_button = $HUD/EndScreen/RestartButton
 @onready var player = $Player
 @onready var attack_manager = $AttackManager
-@onready var missile_spawner = $MissileSpawner
+#@onready var missile_spawner = $MissileSpawner
+const GAME_MUSIC = preload("res://assets/audio/music/game_music.ogg")
 
 
 func _ready():
@@ -31,6 +32,8 @@ func _ready():
 	
 	# Initialize screens
 	show_start_screen()
+	
+	$AudioStreamPlayer.stream = GAME_MUSIC
 
 func _process(delta):
 	if current_state == GameState.PLAYING and is_timer_running:
@@ -59,11 +62,12 @@ func start_game():
 	
 	# Initialize/reset your game objects
 	attack_manager.start_game()
-	missile_spawner.can_spawn = true
+	#missile_spawner.can_spawn = true
 	# etc.
+	$AudioStreamPlayer.play()
 
 func show_game_over():
-	missile_spawner.can_spawn = false
+	#missile_spawner.can_spawn = false
 	
 	if current_state == GameState.GAME_OVER:
 		return
@@ -85,6 +89,7 @@ func show_game_over():
 	# Show end screen
 	game_ui.visible = false
 	end_screen.visible = true
+	$AudioStreamPlayer.stop()
 	
 	
 	if attack_manager.game_timer >= attack_manager.game_duration:

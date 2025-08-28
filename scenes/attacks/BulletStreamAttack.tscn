@@ -1,8 +1,23 @@
-[gd_scene load_steps=3 format=3 uid="uid://bbilyyr7k5y11"]
+[gd_scene load_steps=4 format=3 uid="uid://bbilyyr7k5y11"]
 
 [ext_resource type="Script" uid="uid://dx0cvygycfsmc" path="res://scenes/attacks/BulletStreamAttack.gd" id="1_igm57"]
 [ext_resource type="Texture2D" uid="uid://b0tywprws3pjp" path="res://assets/textures/exclaimation.png" id="2_udbwp"]
 
+[sub_resource type="Gradient" id="Gradient_udbwp"]
+offsets = PackedFloat32Array(0, 0.28725037)
+colors = PackedColorArray(1, 0.7833333, 0, 1, 1, 0.7833333, 0, 0)
+
 [node name="BulletStreamAttack" type="Node2D"]
 script = ExtResource("1_igm57")
-warning_icon_texture = ExtResource("2_udbwp")
+
+[node name="warning_graphics" type="Node2D" parent="."]
+
+[node name="Line" type="Line2D" parent="warning_graphics"]
+points = PackedVector2Array(0, 0, 325, 0)
+width = 20.0
+gradient = SubResource("Gradient_udbwp")
+
+[node name="Sprite2D" type="Sprite2D" parent="warning_graphics"]
+position = Vector2(20, 0)
+scale = Vector2(3, 3)
+texture = ExtResource("2_udbwp")

@@ -1,113 +1,138 @@
 extends BaseAttack
 class_name BulletStreamAttack
 
-@export var start_position: Vector2
-@export var direction: Vector2 = Vector2.RIGHT
-@export var stream_width: float = 20.0
-@export var bullet_speed: float = 300.0
+var direction: Vector2
+@export var stream_width: float = 20.0 
+@export var speed: float = 300.0
 @export var bullet_spacing: float = 50.0
-@export var warning_icon_texture: Texture2D  # Optional custom warning icon
-@export var debug_draw := true
+@export var fire_rate: float = 0.1
+@export var bullet_count: int = 10  
 
-const bullet_scene = preload("res://scenes/projectiles/Bullet.tscn")
+# Path movement variables
+@export var path_follow: PathFollow2D
+@export var path_speed: float = 100.0
+@export var path_loop: bool = false
+@export var rotate_with_path: bool = true
+@export var smooth_rotation: bool = false
+@export var rotation_speed: float = 5.0
 
-var warning_line: Line2D
-var warning_icon: Sprite2D
-var bullets: Array[RigidBody2D] = []
-var end_position: Vector2
+const BULLET_SCENE = preload("res://scenes/projectiles/Bullet.tscn")
+
+var _spawn_timer: float = 0.0
+var _current_bullet_spacing_offset: float = 0.0
+var _active_bullets: Array[Node] = []
+var _bullets_spawned: int = 0  
+
+# Path following variables
+var _is_following_path: bool = false
+var _initial_position: Vector2
+var _initial_direction: Vector2
+var _path: Path2D
 
 func _ready():
-	var bounds = CameraBounds.rect
-
-	# Compute start and end positions based on direction
-	if start_position == Vector2.ZERO:
-		start_position = get_edge_spawn_point(bounds, direction, 50.0)
-
-	end_position = get_edge_spawn_point(bounds, -direction, 50.0)
-	direction = (end_position - start_position).normalized()
-
 	super._ready()
+	_initial_direction = global_transform.x.normalized()
+	direction = _initial_direction
+	$warning_graphics/Line.width = stream_width
+	_initial_position = global_position
+	
+	if path_follow:
+		_setup_path_following()
 
-func get_edge_spawn_point(bounds: Rect2, dir: Vector2, padding: float = 50.0) -> Vector2:
-	var center = bounds.position + bounds.size * 0.5
-	var half = bounds.size * 0.5
-	var offset = dir.normalized() * (half + Vector2(padding, padding))
-	return center + offset
+func _process(delta):
+	# Handle path movement
+	if _is_following_path:
+		_update_path_movement(delta)
+	
+	if _bullets_spawned >= bullet_count:
+		if not _completed:		
+			attack_completed.emit(self)
+			_completed = true
+		return  # Stop firing if limit reached
 
-func show_warning():
-	# Create warning line
-	warning_line = Line2D.new()
-	warning_line.width = stream_width
-	warning_line.default_color = Color(1, 0, 0, 0.2)
-	add_child(warning_line)
-
-	warning_line.add_point(start_position)
-	warning_line.add_point(end_position)
-
-	# Animate warning line (pulsing)
-	var tween = create_tween()
-	tween.set_loops()
-	tween.tween_property(warning_line, "default_color:a", 0.05, 0.3)
-	tween.tween_property(warning_line, "default_color:a", 0.2, 0.3)
-
-	# Optional warning icon
-	if warning_icon_texture:
-		warning_icon = Sprite2D.new()
-		warning_icon.scale = Vector2(5,5)
-		warning_icon.texture = warning_icon_texture
-		warning_icon.position = start_position + (direction * 70.0)  # pull it into screen
-		add_child(warning_icon)
-
-		# Animate icon
-		var icon_tween = create_tween()
-		icon_tween.set_loops()
-
-		#icon_tween.tween_property(warning_icon, "modulate:a", 0.5, 0.4)
-		#icon_tween.tween_property(warning_icon, "modulate:a", 0.9, 0.4)
-
-		icon_tween.parallel().tween_property(warning_icon, "scale", Vector2(6.2, 6.2), 0.3)
-		icon_tween.parallel().tween_property(warning_icon, "scale", Vector2(4.8, 4.8), 0.3)
-
-func hide_warning():
-	if warning_line:
-		warning_line.queue_free()
-	if warning_icon:
-		warning_icon.queue_free()
+	_spawn_timer += delta
+	if _spawn_timer >= fire_rate:
+		spawn_bullet()
+		_spawn_timer = 0.0
 
 func execute_attack():
-	spawn_bullets()
+	super.execute_attack()
+	_spawn_timer = 0.0
+	_current_bullet_spacing_offset = 0.0
+	_bullets_spawned = 0
 
-func spawn_bullets():
-	var total_distance = (end_position - start_position).length()
-	var bullet_count = int(total_distance / bullet_spacing)
+func _setup_path_following():
+	_is_following_path = true
+	_path = path_follow.get_parent() as Path2D
+	
+	# Find the closest point on the path to our current position
+	var closest_offset = _path.curve.get_closest_offset(_path.to_local(global_position))
+	path_follow.progress = closest_offset
+	path_follow.loop = path_loop
 
-	for i in range(bullet_count):
-		var bullet = bullet_scene.instantiate()
-		get_parent().add_child(bullet)
+func _update_path_movement(delta):
+	# Move along the path
+	path_follow.progress += path_speed * delta
+	
+	# Update position
+	global_position = path_follow.global_position
+	
+	# Handle rotation based on settings
+	if rotate_with_path:
+		# Get the path direction and combine it with the initial direction
+		var path_direction = path_follow.transform.x.normalized()
+		var initial_angle = _initial_direction.angle() + PI/2
+		var path_angle = path_direction.angle()
+		var target_angle = path_angle + initial_angle
+		
+		if smooth_rotation:
+			# Smooth rotation interpolation
+			var current_angle = direction.angle()
+			var new_angle = lerp_angle(current_angle, target_angle, rotation_speed * delta)
+			direction = Vector2.from_angle(new_angle)
+			global_rotation = new_angle
+		else:
+			# Instant rotation
+			direction = Vector2.from_angle(target_angle)
+			global_rotation = target_angle
+	
+	# Stop following if we've reached the end and not looping
+	if not path_loop and path_follow.progress_ratio >= 1.0:
+		_is_following_path = false
 
-		var pos = start_position + direction * (-i * bullet_spacing)
-		bullet.global_position = pos
-		bullet.rotation = direction.angle()
-		bullet.linear_velocity = direction * bullet_speed
-		bullets.append(bullet)
-
-		await get_tree().create_timer(0.05).timeout
-
-func cleanup():
-	get_tree().create_timer(5.0).timeout.connect(_cleanup_bullets)
-	super.cleanup()
-
-func _cleanup_bullets():
-	for bullet in bullets:
-		if is_instance_valid(bullet):
-			bullet.queue_free()
-
-func _draw():
-	if not debug_draw:
+func spawn_bullet():
+	if not BULLET_SCENE or _bullets_spawned >= bullet_count:
 		return
 
-	draw_circle(to_local(start_position), 6, Color.YELLOW)
-	draw_circle(to_local(end_position), 6, Color.CYAN)
+	var bullet = BULLET_SCENE.instantiate()
+	get_parent().add_child(bullet)
 
-	var arrow_tip = to_local(start_position + direction * 30.0)
-	draw_line(to_local(start_position), arrow_tip, Color.ORANGE, 2)
+	var perp_direction = direction.orthogonal()
+	var offset_from_center = fmod(_current_bullet_spacing_offset, stream_width) - (stream_width / 2.0)
+	var spawn_pos_offset_from_origin = perp_direction * offset_from_center
+
+	bullet.global_position = global_position + spawn_pos_offset_from_origin
+	bullet.rotation = direction.angle()
+	bullet.set_velocity(direction * speed)
+
+	_active_bullets.append(bullet)
+	_bullets_spawned += 1  
+	_current_bullet_spacing_offset += bullet_spacing
+
+	# Filter invalid bullets
+	_active_bullets = _active_bullets.filter(func(b): return is_instance_valid(b))
+
+func _immediate_cleanup():
+	_cleanup_bullets(0)
+	super._immediate_cleanup()
+
+func cleanup():
+	_cleanup_bullets(20)
+	super.cleanup()
+
+func _cleanup_bullets(cleanup_after: float = 20):
+	await get_tree().create_timer(cleanup_after).timeout
+	for bullet in _active_bullets:
+		if is_instance_valid(bullet):
+			bullet.queue_free()
+	_active_bullets.clear()

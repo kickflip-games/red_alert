@@ -2,12 +2,13 @@
 
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
-uid="uid://bdd34qb8o5i1j"
-valid=false
+uid="uid://bpwiir1ooc1bl"
+path="res://.godot/imported/game_music.ogg-fcf795fb9bf8e3d9ee85a8da1a33c51c.oggvorbisstr"
 
 [deps]
 
 source_file="res://assets/audio/music/game_music.ogg"
+dest_files=["res://.godot/imported/game_music.ogg-fcf795fb9bf8e3d9ee85a8da1a33c51c.oggvorbisstr"]
 
 [params]
 

@@ -3,10 +3,12 @@ extends Node2D
 @export var missile_scene: PackedScene # Assign your missile scene in the inspector
 @export var spawn_delay: float = 2.0
 @export var spawn_radius: float = 600.0
+@export var max_num_active:int = 4
 
 var active_missiles: Array[Node] = []
 var player: Node2D
 var can_spawn:bool = true
+
 
 func _ready():
 	# Find the player
@@ -19,7 +21,7 @@ func _process(delta):
 	active_missiles = active_missiles.filter(func(missile): return is_instance_valid(missile))
 	
 	# Always ensure at least one missile exists
-	if active_missiles.is_empty() and can_spawn:
+	if len(active_missiles)<max_num_active and can_spawn:
 		spawn_missile()
 	
 
