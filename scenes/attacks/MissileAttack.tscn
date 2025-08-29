@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3 uid="uid://bke4qrafgvt22"]
+
+[ext_resource type="Script" uid="uid://yahydsd1khkf" path="res://scenes/attacks/missile_attack.gd" id="1_0mdu4"]
+[ext_resource type="PackedScene" uid="uid://bn6x8ju2cxxth" path="res://scenes/attacks/missile/homing_missile.tscn" id="2_ss444"]
+[ext_resource type="Texture2D" uid="uid://b0tywprws3pjp" path="res://assets/textures/exclaimation.png" id="3_74krh"]
+[ext_resource type="Texture2D" uid="uid://lypismua7jkq" path="res://assets/textures/background/vignette.png" id="4_i3p4r"]
+
+[node name="MissileAttack" type="Node2D"]
+script = ExtResource("1_0mdu4")
+missile_scene = ExtResource("2_ss444")
+spawn_radius = 500.0
+
+[node name="warning_graphics" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="warning_graphics"]
+position = Vector2(-544, -322)
+scale = Vector2(3, 3)
+texture = ExtResource("3_74krh")
+
+[node name="Sprite2D2" type="Sprite2D" parent="warning_graphics"]
+position = Vector2(-544, 288)
+scale = Vector2(3, 3)
+texture = ExtResource("3_74krh")
+
+[node name="Sprite2D3" type="Sprite2D" parent="warning_graphics"]
+position = Vector2(556, 288)
+scale = Vector2(3, 3)
+texture = ExtResource("3_74krh")
+
+[node name="Sprite2D4" type="Sprite2D" parent="warning_graphics"]
+position = Vector2(556, -322)
+scale = Vector2(3, 3)
+texture = ExtResource("3_74krh")
+
+[node name="Background" type="Sprite2D" parent="warning_graphics"]
+modulate = Color(1, 1, 0.3019608, 1)
+self_modulate = Color(1, 1, 1, 0.30980393)
+texture = ExtResource("4_i3p4r")

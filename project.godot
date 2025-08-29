@@ -18,10 +18,15 @@ config/icon="uid://dnj15kqmp5xsi"
 [autoload]
 
 CameraBounds="*res://autoloads/CameraBounds.gd"
+SoundManager="*res://addons/sound_manager/sound_manager.gd"
 
 [display]
 
 window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/sound_manager/plugin.cfg")
 
 [global_group]
 

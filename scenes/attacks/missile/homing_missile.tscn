@@ -17,6 +17,12 @@ colors = PackedColorArray(1, 1, 0, 1, 1, 1, 0, 0)
 [node name="HomingMissile" type="CharacterBody2D" groups=["missiles"]]
 collision_mask = 2
 script = ExtResource("1_51g4w")
+base_speed = 160.0
+base_turn_speed = 2.0
+base_acceleration = 35.0
+speed_variation = 0.40000000000873115
+turn_speed_variation = 0.5
+acceleration_variation = 0.5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_2sou5")

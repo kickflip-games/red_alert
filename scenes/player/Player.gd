@@ -23,7 +23,7 @@ extends Node2D
 @export var curved_trail_segments := 8
 
 # --- Juice FX ---
-@export var hit_pause_duration := 0.08
+@export var hit_pause_duration := 0.095
 @export var dash_bloom_intensity := 1.8
 @export var idle_pulse_speed := 2.0
 @export var dash_dial_radius := 40.0
@@ -76,6 +76,9 @@ var turn_trail_right_tween: Tween
 @onready var movement_trail: Line2D = $MovementTrail
 @onready var dash_dial: Line2D = $DashDial
 @onready var dash_dial_bg: Line2D = $DashDialBG
+
+
+const HURT_SFX = preload("res://assets/audio/sfx/hurt-sound.ogg")
 
 # --- Signals ---
 signal hp_changed(current_hp: int)
@@ -405,12 +408,13 @@ func _on_body_entered(body: Node2D):
 	if is_dashing or is_invincible:
 		return
 	
-	trigger_hit_pause()
 	take_damage(1)
 	body.queue_free()
 
 func take_damage(amount: int):
 	current_hp -= amount
+	trigger_hit_pause()
+	SoundManager.play_sound_with_pitch(HURT_SFX, randf_range(0.75, 1.0))
 	emit_signal("hp_changed", current_hp)
 	print("Took damage! HP = ", current_hp)
 

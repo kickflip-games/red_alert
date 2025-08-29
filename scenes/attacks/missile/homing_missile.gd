@@ -1,40 +1,54 @@
 # HomingMissile.gd
 extends CharacterBody2D
 
-@export var speed: float = 200.0
-@export var turn_speed: float = 3.0
-@export var acceleration: float = 50.0
+# Base stats with more randomness - much slower!
+@export var base_speed: float = 120.0  # Much slower base speed
+@export var base_turn_speed: float = 1.8  # Slower turning
+@export var base_acceleration: float = 30.0  # Slower acceleration
 
-# Prediction settings
-@export var prediction_time: float = 1.5  # How far ahead to predict (seconds)
-@export var prediction_accuracy: float = 0.8  # 0.0 = no prediction, 1.0 = perfect prediction
+# Randomization ranges (applied on spawn) - toned down
+@export var speed_variation: float = 0.2  # ±20% speed variation
+@export var turn_speed_variation: float = 0.3  # ±30% turn speed variation
+@export var acceleration_variation: float = 0.2  # ±20% acceleration variation
 
-# Anti-clumping settings
-@export var separation_radius: float = 60.0  # Distance to maintain from other missiles
-@export var separation_strength: float = 100.0  # How strongly to avoid other missiles
+# Actual stats (randomized on spawn)
+var speed: float
+var turn_speed: float
+var acceleration: float
+
+# Behavioral settings
+@export var prediction_time: float = 0.8  # Even less prediction
+@export var prediction_accuracy: float = 0.4  # Poor prediction accuracy
+@export var separation_radius: float = 80.0  # Larger separation (more spacing)
+@export var separation_strength: float = 150.0  # Stronger separation force
+@export var fuel_time: float = 12.0  # Shorter lifespan
+
+# Aggression phases - much gentler
+@export var initial_boost_time: float = 1.0  # Shorter boost
+@export var initial_boost_multiplier: float = 1.1  # Barely faster
+@export var close_range_threshold: float = 100.0  # Very close before aggressive
+@export var aggressive_speed_multiplier: float = 1.05  # Tiny speed boost
+@export var aggressive_turn_multiplier: float = 1.2  # Moderate turn boost
 
 # Advanced behavior
-@export var evasion_detection_radius: float = 150.0  # How close to get before using evasion
-@export var spiral_intensity: float = 0.3  # How much to spiral when close
-@export var fuel_time: float = 800.0  # How long missile stays active
+@export var evasion_detection_radius: float = 80.0  # Smaller evasion range
+@export var spiral_intensity: float = 0.3  # Much gentler spirals
+@export var intercept_ahead_distance: float = 100.0  # Less aggressive intercept
 
-# Noise settings for unpredictability
-@export var course_correction_noise: float = 0.4  # Random course adjustments
-@export var speed_noise: float = 0.15  # Random speed variations
-@export var turn_rate_noise: float = 0.3  # Random turning speed changes
-@export var prediction_noise: float = 0.2  # Noise in target prediction
-@export var noise_frequency: float = 2.0  # How often noise changes (Hz)
+# Collision settings
+@export var missile_collision_enabled: bool = true  # Enable missile-missile collisions
+@export var collision_detection_radius: float = 25.0  # How close before collision
+@export var collision_avoidance_strength: float = 0.3  # How much they try to avoid each other (0.0 = no avoidance, 1.0 = strong avoidance)
 
-# Group tactics settings
-@export var enable_group_tactics: bool = true
-@export var formation_radius: float = 120.0  # How spread out formation positions are
-@export var flanking_distance: float = 200.0  # How far to flank around target
-@export var pincer_coordination: bool = true  # Whether to coordinate pincer attacks
-@export var leader_following: bool = true  # Whether some missiles follow a leader
+# Dynamic noise settings
+@export var base_course_noise: float = 0.2
+@export var base_speed_noise: float = 0.1
+@export var base_turn_noise: float = 0.2
+@export var noise_frequency: float = 3.0
 
 # Trail settings
-@export var trail_length: int = 30
-@export var trail_width: float = 8.0
+@export var trail_length: int = 20
+@export var trail_width: float = 6.0
 @export var trail_color_start: Color = Color.ORANGE
 @export var trail_color_end: Color = Color(1.0, 0.3, 0.0, 0.0)
 
@@ -42,315 +56,244 @@ var target: Node2D
 var current_speed: float = 0.0
 var trail_points: Array = []
 var fuel_remaining: float
-var spiral_offset: float = 0.0
-var other_missiles: Array = []
+var spawn_time: float = 0.0
+var phase: String = "initial"  # "initial", "hunting", "aggressive", "desperate"
 
-# Noise variables
+# Enhanced noise variables
 var noise_timer: float = 0.0
-var current_course_noise: Vector2 = Vector2.ZERO
-var current_speed_multiplier: float = 1.0
-var current_turn_multiplier: float = 1.0
-var prediction_error: Vector2 = Vector2.ZERO
-var noise_seed: int
+var course_noise: Vector2 = Vector2.ZERO
+var speed_multiplier: float = 1.0
+var turn_multiplier: float = 1.0
+var unique_seed: int
 
-# Group behavior variables
-var missile_id: int = 0  # Unique ID for this missile
-var group_role: String = "hunter"  # "hunter", "flanker", "blocker", "leader"
-var formation_position: Vector2 = Vector2.ZERO
-var tactical_target: Vector2 = Vector2.ZERO
-var coordination_timer: float = 0.0
+# Intercept behavior
+var intercept_angle: float = 0.0
+var intercept_side: int = 1  # 1 or -1 for left/right intercept
+
+# Other missiles for separation
+var other_missiles: Array = []
 
 @onready var trail := $Trail
 
 func _ready():
 	target = get_tree().get_first_node_in_group("player")
 	fuel_remaining = fuel_time
-	noise_seed = randi()  # Give each missile unique noise patterns
-	missile_id = randi() % 10000  # Assign unique ID
+	unique_seed = randi()
+	
+	# Randomize stats on spawn
+	randomize_stats()
+	
+	# Set initial intercept behavior
+	setup_intercept_behavior()
 	
 	if not target:
-		print("Warning: No player found in 'player' group")
+		push_error("Warning: No player found in 'player' group")
+		queue_free()
+		return
 	
-	# Find other missiles for separation behavior
+	# Start with initial boost phase
+	phase = "initial"
 	update_missile_list()
+
+func randomize_stats():
+	# Apply random variations to base stats
+	speed = base_speed * randf_range(1.0 - speed_variation, 1.0 + speed_variation)
+	turn_speed = base_turn_speed * randf_range(1.0 - turn_speed_variation, 1.0 + turn_speed_variation)
+	acceleration = base_acceleration * randf_range(1.0 - acceleration_variation, 1.0 + acceleration_variation)
 	
-	# Initialize noise values
-	update_noise_values()
-	
-	# Assign tactical role based on existing missile count
-	assign_tactical_role()
+	# Randomize noise levels too
+	var noise_variation = randf_range(0.5, 1.5)
+	base_course_noise *= noise_variation
+	base_speed_noise *= noise_variation
+	base_turn_noise *= noise_variation
+
+func setup_intercept_behavior():
+	# Randomly choose which side to approach from and intercept angle
+	intercept_side = 1 if randf() > 0.5 else -1
+	intercept_angle = randf_range(PI * 0.3, PI * 0.7)  # 30-70 degree intercept angles
 
 func _physics_process(delta):
 	if not target or fuel_remaining <= 0:
 		self_destruct()
 		return
 	
+	spawn_time += delta
 	fuel_remaining -= delta
-	spiral_offset += delta * 3.0  # For spiral movement
 	noise_timer += delta
-	coordination_timer += delta
 	
-	# Update noise values periodically
+	# Check for missile collisions
+	if missile_collision_enabled:
+		check_missile_collisions()
+	
+	# Update phase based on conditions
+	update_phase()
+	
+	# Update noise periodically
 	if noise_timer >= 1.0 / noise_frequency:
 		update_noise_values()
 		noise_timer = 0.0
 	
-	# Update group coordination periodically
-	if coordination_timer >= 0.5:  # Update tactics twice per second
-		update_group_coordination()
-		coordination_timer = 0.0
-	
-	# Update our list of other missiles periodically
-	if randf() < 0.1:  # 10% chance each frame to update list
+	# Update missile list occasionally
+	if randf() < 0.05:  # 5% chance per frame
 		update_missile_list()
 	
-	# Get tactical target position (may be different from direct target)
-	var target_position = get_tactical_target_position()
+	# Get target position based on current phase
+	var target_position = get_phase_target_position()
 	
-	# Calculate base direction to tactical target
+	# Calculate movement
 	var direction_to_target = (target_position - global_position).normalized()
-	
-	# Add separation force from other missiles
 	var separation_force = get_separation_force()
+	var collision_avoidance_force = get_collision_avoidance_force()
+	var phase_modifier = get_phase_behavior_modifier()
 	
-	# Add evasive spiral when close to target
-	var evasion_force = get_evasion_force()
+	# Combine forces
+	var final_direction = (direction_to_target + separation_force + collision_avoidance_force + phase_modifier).normalized()
 	
-	# Add course correction noise
-	var noise_force = current_course_noise
+	# Apply phase-specific turn speed
+	var current_turn_speed = turn_speed * turn_multiplier * get_phase_turn_multiplier()
 	
-	# Add group coordination force
-	var group_force = get_group_coordination_force()
-	
-	# Combine all forces
-	var final_direction = (direction_to_target + separation_force + evasion_force + noise_force + group_force).normalized()
-	
-	# Apply turn rate noise to rotation speed
-	var noisy_turn_speed = turn_speed * current_turn_multiplier
-	
-	# Smoothly rotate towards final direction
+	# Rotate towards target
 	var target_rotation = final_direction.angle()
-	rotation = lerp_angle(rotation, target_rotation, noisy_turn_speed * delta)
+	rotation = lerp_angle(rotation, target_rotation, current_turn_speed * delta)
 	
-	# Accelerate towards max speed (with fuel efficiency and speed noise)
-	var fuel_efficiency = fuel_remaining / fuel_time
-	var noisy_speed = speed * current_speed_multiplier
+	# Apply phase-specific speed and acceleration
+	var target_speed = speed * speed_multiplier * get_phase_speed_multiplier()
+	var current_acceleration = acceleration * get_phase_acceleration_multiplier()
 	
-	# Apply role-based speed modifications
-	var role_speed_modifier = get_role_speed_modifier()
-	current_speed = min(current_speed + acceleration * delta * fuel_efficiency, noisy_speed * role_speed_modifier)
+	current_speed = move_toward(current_speed, target_speed, current_acceleration * delta)
 	
-	# Move in the direction we're facing
+	# Move
 	velocity = Vector2.RIGHT.rotated(rotation) * current_speed
 	move_and_slide()
 	
 	update_trail()
 
+func update_phase():
+	var distance_to_target = global_position.distance_to(target.global_position)
+	
+	match phase:
+		"initial":
+			if spawn_time > initial_boost_time:
+				phase = "hunting"
+		"hunting":
+			if distance_to_target < close_range_threshold:
+				phase = "aggressive"
+			elif fuel_remaining < fuel_time * 0.4:  # Less than 40% fuel (more time before desperate)
+				phase = "desperate"
+		"aggressive":
+			if distance_to_target > close_range_threshold * 2.0:  # Easier to escape aggressive mode
+				phase = "hunting"
+			elif fuel_remaining < fuel_time * 0.3:  # Less than 30% fuel
+				phase = "desperate"
+		"desperate":
+			# Stay desperate until death
+			pass
+
+func get_phase_target_position() -> Vector2:
+	if not target:
+		return global_position
+	
+	match phase:
+		"initial":
+			return get_intercept_position()
+		"hunting":
+			return get_predicted_target_position()
+		"aggressive":
+			return get_aggressive_target_position()
+		"desperate":
+			return get_desperate_target_position()
+		_:
+			return target.global_position
+
+func get_intercept_position() -> Vector2:
+	# Much less aggressive intercept - mostly just head toward player
+	var player_velocity = get_target_velocity()
+	var to_player = target.global_position - global_position
+	
+	if player_velocity.length() < 20.0:  # Player is mostly stationary
+		# Just go toward player with slight offset
+		var small_offset = to_player.orthogonal().normalized() * intercept_side * 50.0
+		return target.global_position + small_offset
+	else:
+		# Very mild intercept - mostly chase behavior
+		var mild_prediction = target.global_position + player_velocity * 0.3
+		return mild_prediction
+
 func get_predicted_target_position() -> Vector2:
 	if not target:
 		return Vector2.ZERO
 	
-	# Get target's current velocity
-	var target_velocity = Vector2.ZERO
-	if "velocity" in target:
-		target_velocity = target.velocity
-	elif target.has_method("get_velocity"):
-		target_velocity = target.get_velocity()
-	
-	# Calculate distance and time to intercept
+	var target_velocity = get_target_velocity()
 	var distance_to_target = global_position.distance_to(target.global_position)
 	var time_to_intercept = distance_to_target / max(current_speed, 1.0)
 	
-	# Predict where target will be
 	var prediction_distance = min(time_to_intercept, prediction_time)
-	var predicted_position = target.global_position + (target_velocity * prediction_distance)
+	var predicted_position = target.global_position + (target_velocity * prediction_distance * prediction_accuracy)
 	
-	# Add prediction noise/error
-	predicted_position += prediction_error
-	
-	# Blend between current position and predicted position based on accuracy
-	return target.global_position.lerp(predicted_position, prediction_accuracy)
+	return predicted_position
 
-func get_tactical_target_position() -> Vector2:
-	if not enable_group_tactics:
-		return get_predicted_target_position()
-	
-	match group_role:
-		"hunter":
-			return get_predicted_target_position()
-		"flanker":
-			return get_flanking_position()
-		"blocker":
-			return get_blocking_position()
-		"leader":
-			return get_predicted_target_position()
-		_:
-			return get_predicted_target_position()
+func get_aggressive_target_position() -> Vector2:
+	# In aggressive mode, aim slightly ahead and add spiral movement
+	var base_target = get_predicted_target_position()
+	var spiral_offset = Vector2.UP.rotated(rotation + PI/2) * sin(spawn_time * 4.0) * spiral_intensity * 30.0
+	return base_target + spiral_offset
 
-func assign_tactical_role():
-	if not enable_group_tactics:
-		group_role = "hunter"
-		return
-	
-	var missile_count = other_missiles.size() + 1  # +1 for self
-	
-	# Assign roles based on missile count and ID
-	if missile_count == 1:
-		group_role = "hunter"
-	elif missile_count == 2:
-		if missile_id % 2 == 0:
-			group_role = "hunter"
-		else:
-			group_role = "flanker"
-	elif missile_count >= 3:
-		var role_index = missile_id % 4
-		match role_index:
-			0: group_role = "leader"
-			1: group_role = "flanker"
-			2: group_role = "blocker"
-			3: group_role = "hunter"
+func get_desperate_target_position() -> Vector2:
+	# Desperate mode: go directly for the player with maximum aggression
+	return target.global_position
 
-func update_group_coordination():
-	if not enable_group_tactics or not target:
-		return
-	
-	var missile_count = other_missiles.size() + 1
-	
-	# Update formation based on group size and roles
-	if missile_count >= 2:
-		calculate_formation_position()
-	
-	# Coordinate timing for pincer attacks
-	if pincer_coordination and missile_count >= 2:
-		coordinate_pincer_attack()
-
-func calculate_formation_position():
-	var missile_count = other_missiles.size() + 1
-	var my_index = get_my_formation_index()
-	
-	# Create circular formation around target
-	var angle_step = TAU / missile_count
-	var my_angle = angle_step * my_index
-	
-	formation_position = target.global_position + Vector2.from_angle(my_angle) * formation_radius
-
-func get_my_formation_index() -> int:
-	var sorted_missiles = []
-	
-	# Only add valid missiles to the sorted list
-	for missile in other_missiles:
-		if is_instance_valid(missile):
-			sorted_missiles.append(missile)
-	
-	# Add self
-	sorted_missiles.append(self)
-	
-	# Sort by missile ID
-	sorted_missiles.sort_custom(func(a, b): return a.missile_id < b.missile_id)
-	
-	for i in range(sorted_missiles.size()):
-		if sorted_missiles[i] == self:
-			return i
-	return 0
-
-func get_flanking_position() -> Vector2:
+func get_target_velocity() -> Vector2:
 	if not target:
-		return global_position
-	
-	# Get target's velocity to predict escape direction
-	var target_velocity = Vector2.ZERO
-	if "velocity" in target:
-		target_velocity = target.velocity
-	
-	# Flank from the side the target is moving away from
-	var escape_direction = target_velocity.normalized()
-	if escape_direction.length() < 0.1:
-		escape_direction = (target.global_position - global_position).normalized()
-	
-	# Position perpendicular to escape direction
-	var flank_direction = Vector2(-escape_direction.y, escape_direction.x)
-	if missile_id % 2 == 0:
-		flank_direction = -flank_direction  # Some missiles flank from other side
-	
-	return target.global_position + flank_direction * flanking_distance
-
-func get_blocking_position() -> Vector2:
-	if not target:
-		return global_position
-	
-	# Get target's predicted escape route
-	var predicted_pos = get_predicted_target_position()
-	var escape_direction = (predicted_pos - target.global_position).normalized()
-	
-	# Position ahead of target to block escape
-	return predicted_pos + escape_direction * flanking_distance * 0.7
-
-func coordinate_pincer_attack() -> void:
-	# Simple coordination: wait for other missiles to get into position
-	var missiles_in_position = 0
-	var total_missiles = other_missiles.size() + 1
-	
-	for missile in other_missiles:
-		if not is_instance_valid(missile):
-			continue
-		var distance_to_formation = missile.global_position.distance_to(missile.formation_position)
-		if distance_to_formation < 80.0:  # Close enough to formation position
-			missiles_in_position += 1
-	
-	# Check if we're in position too
-	var my_distance_to_formation = global_position.distance_to(formation_position)
-	if my_distance_to_formation < 80.0:
-		missiles_in_position += 1
-	
-	# If most missiles are in position, signal to attack
-	var coordination_threshold = max(2, total_missiles * 0.6)
-	if missiles_in_position >= coordination_threshold:
-		# Switch to aggressive hunter mode
-		if group_role != "leader":
-			group_role = "hunter"
-
-func get_group_coordination_force() -> Vector2:
-	if not enable_group_tactics:
 		return Vector2.ZERO
 	
-	var coordination_force = Vector2.ZERO
-	
-	# Formation keeping for non-hunter roles
-	if group_role != "hunter" and formation_position != Vector2.ZERO:
-		var to_formation = (formation_position - global_position)
-		var formation_distance = to_formation.length()
-		
-		if formation_distance > 50.0:  # Only apply if we're far from formation
-			coordination_force += to_formation.normalized() * 0.3
-	
-	# Leader following behavior
-	if leader_following and group_role != "leader":
-		var leader = find_leader_missile()
-		if leader:
-			var leader_direction = (leader.global_position - global_position).normalized()
-			var distance_to_leader = global_position.distance_to(leader.global_position)
-			
-			# Follow leader but maintain some distance
-			if distance_to_leader > 150.0:
-				coordination_force += leader_direction * 0.2
-			elif distance_to_leader < 80.0:
-				coordination_force -= leader_direction * 0.2
-	
-	return coordination_force
+	if "velocity" in target:
+		return target.velocity
+	elif target.has_method("get_velocity"):
+		return target.get_velocity()
+	return Vector2.ZERO
 
-func find_leader_missile():
-	for missile in other_missiles:
-		if is_instance_valid(missile) and missile.group_role == "leader":
-			return missile
-	return null
+func get_phase_speed_multiplier() -> float:
+	match phase:
+		"initial": return initial_boost_multiplier
+		"hunting": return 0.9  # Actually slower during hunting
+		"aggressive": return aggressive_speed_multiplier
+		"desperate": return 1.1  # Only slight speed boost when desperate
+		_: return 0.9
 
-func get_role_speed_modifier() -> float:
-	match group_role:
-		"hunter": return 1.0      # Normal speed
-		"flanker": return 1.1     # Slightly faster to get into position
-		"blocker": return 1.2     # Fastest to cut off escape routes  
-		"leader": return 0.9      # Slightly slower, more methodical
-		_: return 1.0
+func get_phase_turn_multiplier() -> float:
+	match phase:
+		"initial": return 1.0  # Normal turning
+		"hunting": return 0.8  # Slower turning during hunt
+		"aggressive": return aggressive_turn_multiplier
+		"desperate": return 1.3  # Decent turning when desperate
+		_: return 0.8
+
+func get_phase_acceleration_multiplier() -> float:
+	match phase:
+		"initial": return 1.1  # Slight acceleration boost
+		"hunting": return 0.8  # Slower acceleration
+		"aggressive": return 1.0  # Normal acceleration
+		"desperate": return 1.2  # Moderate acceleration
+		_: return 0.8
+
+func get_phase_behavior_modifier() -> Vector2:
+	match phase:
+		"initial":
+			# Less randomness to initial approach
+			return Vector2.from_angle(randf() * TAU) * 0.05
+		"hunting":
+			# Standard hunting with mild course correction
+			return course_noise * 0.3
+		"aggressive":
+			# Gentler spiral and weave behavior
+			var spiral = Vector2.UP.rotated(rotation + PI/2) * sin(spawn_time * 3.0) * spiral_intensity * 0.5
+			return spiral + course_noise * 0.7
+		"desperate":
+			# Less erratic movement
+			var erratic = Vector2.from_angle(randf() * TAU) * 0.15
+			return erratic + course_noise * 1.2
+		_:
+			return Vector2.ZERO
 
 func get_separation_force() -> Vector2:
 	var separation = Vector2.ZERO
@@ -368,57 +311,111 @@ func get_separation_force() -> Vector2:
 			nearby_count += 1
 	
 	if nearby_count > 0:
-		separation = separation.normalized() * separation_strength / 100.0
+		separation = separation.normalized() * (separation_strength / 100.0)
+		# Reduce separation in desperate phase (more willing to clump)
+		if phase == "desperate":
+			separation *= 0.5
 	
 	return separation
 
-func get_evasion_force() -> Vector2:
-	var distance_to_target = global_position.distance_to(target.global_position)
-	
-	# Only use evasion when close to target
-	if distance_to_target > evasion_detection_radius:
-		return Vector2.ZERO
-	
-	# Create a spiral pattern to make the missile harder to predict
-	var spiral_strength = (evasion_detection_radius - distance_to_target) / evasion_detection_radius
-	var perpendicular = Vector2.UP.rotated(rotation + PI/2)
-	var spiral_force = perpendicular * sin(spiral_offset) * spiral_intensity * spiral_strength
-	
-	return spiral_force
-
 func update_missile_list():
 	other_missiles.clear()
-	# Find all nodes in the "missiles" group (you'll need to add missiles to this group)
 	var missiles = get_tree().get_nodes_in_group("missiles")
 	for missile in missiles:
-		if missile != self:
+		if missile != self and is_instance_valid(missile):
 			other_missiles.append(missile)
 
 func update_noise_values():
-	# Use a seed-based approach so each missile has consistent but unique noise
-	var time_factor = Time.get_time_dict_from_system().minute * 60 + Time.get_time_dict_from_system().second
-	var seeded_random = (noise_seed + int(time_factor * noise_frequency)) % 1000
+	# Enhanced noise with phase-specific intensity
+	var noise_intensity = get_phase_noise_intensity()
 	
-	# Generate different types of noise using different offsets
-	var course_angle = (float(seeded_random) * 0.1) * TAU
-	var course_magnitude = float((seeded_random * 3) % 100) / 100.0
-	current_course_noise = Vector2.from_angle(course_angle) * course_magnitude * course_correction_noise
+	var time_factor = spawn_time * noise_frequency
+	var seeded_random = sin(unique_seed + time_factor)
 	
-	# Speed noise (0.85 to 1.15 range by default)
-	var speed_random = float((seeded_random * 7) % 100) / 100.0
-	current_speed_multiplier = 1.0 + (speed_random - 0.5) * 2.0 * speed_noise
-	current_speed_multiplier = clamp(current_speed_multiplier, 0.5, 1.5)
+	# Course noise
+	var course_angle = seeded_random * TAU
+	var course_magnitude = abs(sin(unique_seed * 2 + time_factor * 1.3))
+	course_noise = Vector2.from_angle(course_angle) * course_magnitude * base_course_noise * noise_intensity
 	
-	# Turn rate noise (0.7 to 1.3 range by default)
-	var turn_random = float((seeded_random * 11) % 100) / 100.0
-	current_turn_multiplier = 1.0 + (turn_random - 0.5) * 2.0 * turn_rate_noise
-	current_turn_multiplier = clamp(current_turn_multiplier, 0.3, 2.0)
+	# Speed noise
+	speed_multiplier = 1.0 + sin(unique_seed * 3 + time_factor * 0.8) * base_speed_noise * noise_intensity
+	speed_multiplier = clamp(speed_multiplier, 0.6, 1.6)
 	
-	# Prediction error noise
-	var pred_angle = (float(seeded_random) * 0.13) * TAU
-	var pred_magnitude = float((seeded_random * 17) % 100) / 100.0
-	var max_error = 50.0  # Maximum prediction error in pixels
-	prediction_error = Vector2.from_angle(pred_angle) * pred_magnitude * prediction_noise * max_error
+	# Turn rate noise
+	turn_multiplier = 1.0 + sin(unique_seed * 5 + time_factor * 1.1) * base_turn_noise * noise_intensity
+	turn_multiplier = clamp(turn_multiplier, 0.5, 2.0)
+
+func get_phase_noise_intensity() -> float:
+	match phase:
+		"initial": return 0.6  # Less noise
+		"hunting": return 0.8   # Reduced noise
+		"aggressive": return 1.0  # Normal noise
+		"desperate": return 1.3   # Less erratic
+		_: return 0.8
+
+func check_missile_collisions():
+	for missile in other_missiles:
+		if not is_instance_valid(missile):
+			continue
+			
+		var distance = global_position.distance_to(missile.global_position)
+		if distance < collision_detection_radius:
+			# BOOM! Both missiles explode
+			print("Missile collision! Both missiles destroyed")
+			missile.destroy_from_collision()
+			destroy_from_collision()
+			return  # Exit early since we're about to be destroyed
+
+func get_collision_avoidance_force() -> Vector2:
+	if not missile_collision_enabled or collision_avoidance_strength <= 0.0:
+		return Vector2.ZERO
+	
+	var avoidance = Vector2.ZERO
+	var collision_threats = 0
+	
+	# Check for imminent collisions and try to avoid them (but not too hard!)
+	for missile in other_missiles:
+		if not is_instance_valid(missile):
+			continue
+			
+		var distance = global_position.distance_to(missile.global_position)
+		var collision_buffer = collision_detection_radius * 2.0  # Start avoiding at 2x collision distance
+		
+		if distance < collision_buffer and distance > 0:
+			# Calculate if we're on a collision course
+			var to_missile = missile.global_position - global_position
+			var our_velocity_normalized = velocity.normalized()
+			var their_velocity_normalized = Vector2.ZERO
+			
+			if "velocity" in missile:
+				their_velocity_normalized = missile.velocity.normalized()
+			
+			# Check if we're heading towards each other
+			var heading_towards = our_velocity_normalized.dot(to_missile.normalized()) > 0.3
+			var they_heading_towards = their_velocity_normalized.dot(-to_missile.normalized()) > 0.3
+			
+			if heading_towards and they_heading_towards:
+				# We're on a collision course, try to avoid
+				var away_direction = (global_position - missile.global_position).normalized()
+				var avoidance_strength = (collision_buffer - distance) / collision_buffer
+				avoidance += away_direction * avoidance_strength
+				collision_threats += 1
+	
+	if collision_threats > 0:
+		avoidance = avoidance.normalized() * collision_avoidance_strength
+		# Reduce avoidance in desperate phase (more willing to crash)
+		if phase == "desperate":
+			avoidance *= 0.3
+	
+	return avoidance
+
+func destroy_from_collision():
+	print("Missile destroyed by collision with another missile!")
+	# Add explosion effect here if desired
+	destroy()
+
+func destroy():
+	queue_free()
 
 func update_trail():
 	trail_points.append(global_position)
@@ -426,19 +423,16 @@ func update_trail():
 	if trail_points.size() > trail_length:
 		trail_points.pop_front()
 	
-	trail.visible = true
-	trail.clear_points()
-	
-	for point in trail_points:
-		trail.add_point(to_local(point))
+	if trail:
+		trail.visible = true
+		trail.clear_points()
+		
+		for point in trail_points:
+			trail.add_point(to_local(point))
 
 func self_destruct():
-	# Add explosion effect here if desired
-	print("Missile self-destructed")
+	print("Missile fuel depleted - self destructing")
 	destroy()
-
-func destroy():
-	queue_free()
 
 func _on_area_2d_body_entered(body):
 	if body.is_in_group("player"):
@@ -446,7 +440,6 @@ func _on_area_2d_body_entered(body):
 		# Add explosion/damage logic here
 		destroy()
 
-# Call this when spawning the missile to add it to the missiles group
 func _enter_tree():
 	add_to_group("missiles")
 
