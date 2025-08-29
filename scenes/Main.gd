@@ -21,7 +21,7 @@ var is_timer_running: bool = false
 @onready var attack_manager = $AttackManager
 #@onready var missile_spawner = $MissileSpawner
 const GAME_MUSIC = preload("res://assets/audio/music/game_music.ogg")
-
+const MENU_MUSIC = preload("res://assets/audio/music/menu-music-OGG.ogg")
 
 func _ready():
 	# Connect button signals
@@ -51,6 +51,7 @@ func show_start_screen():
 	# Pause game elements
 	get_tree().paused = false  # UI can still work
 	# Stop any game processes
+	SoundManager.play_music(MENU_MUSIC)
 
 func start_game():
 	current_state = GameState.PLAYING
@@ -91,7 +92,7 @@ func show_game_over():
 	# Show end screen
 	game_ui.visible = false
 	end_screen.visible = true
-	SoundManager.stop_music(0.5)
+	SoundManager.play_music(MENU_MUSIC, 0.5)
 	
 	
 	if attack_manager.game_timer >= attack_manager.game_duration:
