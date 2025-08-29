@@ -7,6 +7,8 @@ class_name BaseAttack
 var warning_node: Node2D
 var warning_tween: Tween
 var _completed: bool = false
+const ALERT_SFX = preload("res://assets/audio/sfx/alarm-sound-OGG.ogg")
+const SHOOT_SFX = preload("res://assets/audio/sfx/bullet-sound-OGG.ogg")
 
 signal attack_completed(attack: BaseAttack)
 
@@ -45,6 +47,7 @@ func show_warning():
 		return
 	
 	warning_node.visible = true
+	SoundManager.play_sound_with_pitch(ALERT_SFX, randf_range(0.5, 1.0))
 	
 	# Use safe tween management
 	_safe_kill_tween(warning_tween)
