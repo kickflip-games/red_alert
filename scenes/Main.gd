@@ -33,7 +33,9 @@ func _ready():
 	# Initialize screens
 	show_start_screen()
 	
-	$AudioStreamPlayer.stream = GAME_MUSIC
+
+	
+	
 
 func _process(delta):
 	if current_state == GameState.PLAYING and is_timer_running:
@@ -64,7 +66,7 @@ func start_game():
 	attack_manager.start_game()
 	#missile_spawner.can_spawn = true
 	# etc.
-	$AudioStreamPlayer.play()
+	SoundManager.play_music(GAME_MUSIC, 0.5)
 
 func show_game_over():
 	#missile_spawner.can_spawn = false
@@ -89,7 +91,7 @@ func show_game_over():
 	# Show end screen
 	game_ui.visible = false
 	end_screen.visible = true
-	$AudioStreamPlayer.stop()
+	SoundManager.stop_music(0.5)
 	
 	
 	if attack_manager.game_timer >= attack_manager.game_duration:

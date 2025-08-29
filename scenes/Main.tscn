@@ -269,7 +269,4 @@ player = NodePath("../Player")
 heart_full_texture = ExtResource("5_c01mt")
 heart_empty_texture = ExtResource("6_nxtc6")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-playback_type = 1
-
 [editable path="Background"]
