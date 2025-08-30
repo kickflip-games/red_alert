@@ -10,6 +10,7 @@ class_name HUD
 @onready var hearts := $GameUi/Hearts
 @onready var timer_label := $GameUi/TimerLabel
 @onready var wave_label := $GameUi/WaveDebugLabel
+@onready var word_display: RichTextLabel = $GameUi/WordDisplay
 
 # Tween management for hearts
 var heart_tweens: Array[Tween] = []
@@ -19,8 +20,9 @@ func _ready():
 		push_error("Player node not assigned to HUD")
 		return
 	
-	player.connect("hp_changed", _on_hp_changed)
-	player.connect("dash_cooldown_updated", _on_dash_cooldown_updated)
+	player.hp_changed.connect(_on_hp_changed)
+	player.dash_cooldown_updated.connect(_on_dash_cooldown_updated)
+	player.letter_pickedup.connect(_on_letter_pickedup)
 	
 	update_hearts(player.current_hp)
 	$GameUi.visible = false
@@ -32,6 +34,10 @@ func _on_hp_changed(current_hp: int):
 
 func _on_dash_cooldown_updated(percent_ready: float):
 	dash_bar.value = percent_ready * 100.0
+	
+func _on_letter_pickedup(new_letter: String):
+	word_display._on_letter_collected(new_letter)
+	
 
 func update_hearts(current_hp: int):
 	# Ensure we have enough tween slots

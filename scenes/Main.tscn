@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://c7etnmicu136n"]
+[gd_scene load_steps=21 format=3 uid="uid://c7etnmicu136n"]
 
 [ext_resource type="PackedScene" uid="uid://dsmsb7kwv0ce1" path="res://managers/camera_2d.tscn" id="1_c01mt"]
 [ext_resource type="Script" uid="uid://cfeicvpmqto3f" path="res://scenes/Main.gd" id="1_jlsqs"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://8e8b6xpph6c" path="res://scenes/attacks/attack_wave.gd" id="6_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://bke4qrafgvt22" path="res://scenes/attacks/MissileAttack.tscn" id="6_wp0k4"]
 [ext_resource type="PackedScene" uid="uid://bbilyyr7k5y11" path="res://scenes/attacks/BulletStreamAttack.tscn" id="7_qmy6f"]
+[ext_resource type="PackedScene" uid="uid://cxaxhc521axja" path="res://scenes/collectibles/CollectibleSpawner.tscn" id="13_qmy6f"]
 
 [sub_resource type="Environment" id="Environment_nxtc6"]
 glow_enabled = true
@@ -40,6 +41,8 @@ _data = {
 "points": PackedVector2Array(0, 0, 0, 0, 1117, 618, 0, 0, 0, 0, 19, 626, 0, 0, 0, 0, 23, 28, 0, 0, 0, 0, 1122, 25)
 }
 point_count = 4
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_bjd11"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_jlsqs")
@@ -284,5 +287,44 @@ rotation = 3.134307
 player = NodePath("../Player")
 heart_full_texture = ExtResource("5_c01mt")
 heart_empty_texture = ExtResource("6_nxtc6")
+
+[node name="CollectibleSpawner" parent="." instance=ExtResource("13_qmy6f")]
+
+[node name="Bounds" type="Node2D" parent="."]
+
+[node name="LeftWall" type="StaticBody2D" parent="Bounds"]
+position = Vector2(0, 339)
+rotation = 1.5707964
+collision_layer = 8
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Bounds/LeftWall"]
+shape = SubResource("WorldBoundaryShape2D_bjd11")
+
+[node name="RightWall" type="StaticBody2D" parent="Bounds"]
+position = Vector2(1212, 354)
+rotation = -1.5707964
+collision_layer = 8
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Bounds/RightWall"]
+shape = SubResource("WorldBoundaryShape2D_bjd11")
+
+[node name="BottomWall" type="StaticBody2D" parent="Bounds"]
+position = Vector2(610, 643)
+collision_layer = 8
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Bounds/BottomWall"]
+shape = SubResource("WorldBoundaryShape2D_bjd11")
+
+[node name="TopWall" type="StaticBody2D" parent="Bounds"]
+position = Vector2(610, 5)
+rotation = -3.1415927
+collision_layer = 8
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Bounds/TopWall"]
+shape = SubResource("WorldBoundaryShape2D_bjd11")
 
 [editable path="Background"]

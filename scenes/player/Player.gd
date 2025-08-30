@@ -70,6 +70,7 @@ var turn_trail_right_tween: Tween
 @onready var movement_particles: GPUParticles2D = $MovementParticles
 @onready var idle_pulse_particles: GPUParticles2D = $IdlePulseParticles
 @onready var collision_area: Area2D = $CollisionArea
+@onready var collectable_area: Area2D = $CollectableArea
 @onready var turn_fx_left: Line2D = $TurnFXLeft
 @onready var turn_fx_right: Line2D = $TurnFXRight
 @onready var dash_trail: Line2D = $DashTrail
@@ -79,17 +80,21 @@ var turn_trail_right_tween: Tween
 
 
 const HURT_SFX = preload("res://assets/audio/sfx/hurt-sound.ogg")
+const DASH_SFX = preload("res://assets/audio/sfx/dash-sound.ogg")
 
 # --- Signals ---
 signal hp_changed(current_hp: int)
 signal dash_cooldown_updated(percent_ready: float)
 signal player_died
+signal letter_pickedup(letter:String)
 
 func _ready():
 	target_position = global_position
 	reticle.visible = true
 	reticle.modulate.a = 0.5
-	collision_area.connect("body_entered", _on_body_entered)
+	collision_area.body_entered.connect(_on_body_entered)
+	collectable_area.body_entered.connect(_on_collectable_entered)
+	
 	emit_signal("hp_changed", current_hp)
 	last_rotation = rotation
 	
@@ -97,7 +102,7 @@ func _ready():
 	_setup_dash_dial()
 
 func _setup_movement_trail():
-	movement_trail.width = 2.0
+	#movement_trail.width = 2.0
 	movement_trail.default_color = Color(1.0, 1.0, 1.0, 0.7)
 	movement_trail.visible = true
 
@@ -179,6 +184,7 @@ func can_dash() -> bool:
 
 func start_dash():
 	is_dashing = true
+	SoundManager.play_sound_with_pitch(DASH_SFX, randf_range(0.85, 1))
 	dash_timer = dash_duration
 	dash_cooldown_timer = dash_cooldown
 	dash_direction = (target_position - global_position).normalized()
@@ -404,12 +410,18 @@ func _get_dash_percent_ready() -> float:
 
 # --- Enhanced Collision & Damage ---
 func _on_body_entered(body: Node2D):
-	print("Body entered: ", body.name)
 	if is_dashing or is_invincible:
 		return
 	
+
 	take_damage(1)
 	body.queue_free()
+
+func _on_collectable_entered(body: Node2D):
+	if body is Collectible:
+		body.trigger_collection()
+		letter_pickedup.emit(body.letter_char)
+
 
 func take_damage(amount: int):
 	current_hp -= amount
@@ -422,6 +434,7 @@ func take_damage(amount: int):
 		die()
 	else:
 		become_invincible()
+
 
 func become_invincible():
 	if not is_instance_valid(sprite):

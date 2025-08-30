@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://bib5lohuq1xli"]
+[gd_scene load_steps=9 format=3 uid="uid://bib5lohuq1xli"]
 
 [ext_resource type="Script" uid="uid://ct0mjkwg5mxy8" path="res://scenes/ui/HUD.gd" id="1_r8hcy"]
 [ext_resource type="Texture2D" uid="uid://blmdh84m208op" path="res://assets/textures/heart/heart_full.png" id="2_atyv1"]
 [ext_resource type="Texture2D" uid="uid://1r7uxcup4ew3" path="res://assets/textures/logo.png" id="3_6ll6g"]
 [ext_resource type="FontFile" uid="uid://b61dtuoni8re8" path="res://assets/fonts/game_font.ttf" id="4_ig75s"]
+[ext_resource type="Script" uid="uid://br8qvmjjmcmg" path="res://scenes/ui/WordDisplay.gd" id="5_rnyu1"]
 
 [sub_resource type="Theme" id="Theme_atyv1"]
 
@@ -30,10 +31,10 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -128.5
-offset_top = 17.97
-offset_right = 128.5
-offset_bottom = 100.97
+offset_left = -540.0
+offset_top = 18.0
+offset_right = -283.0
+offset_bottom = 101.0
 grow_horizontal = 2
 alignment = 1
 
@@ -71,20 +72,47 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -111.0
+offset_left = 4.0
+offset_top = -639.0
+offset_right = 4.0
+offset_bottom = -528.0
 grow_horizontal = 2
 grow_vertical = 0
 theme = SubResource("Theme_4ed8p")
 theme_override_fonts/normal_font = ExtResource("4_ig75s")
 theme_override_font_sizes/normal_font_size = 100
 text = "100/100 seconds"
-horizontal_alignment = 1
+horizontal_alignment = 2
 
 [node name="WaveDebugLabel" type="Label" parent="GameUi"]
+visible = false
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
 text = "Wavename"
+
+[node name="WordDisplay" type="RichTextLabel" parent="GameUi"]
+clip_contents = false
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -163.0
+offset_bottom = -63.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/default_color = Color(0.10980392, 0.10980392, 0.10980392, 0.54509807)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 10
+theme_override_fonts/normal_font = ExtResource("4_ig75s")
+theme_override_font_sizes/normal_font_size = 101
+bbcode_enabled = true
+text = "BISCUIT"
+scroll_active = false
+horizontal_alignment = 1
+script = ExtResource("5_rnyu1")
+collected_color = Color(1, 0.050980393, 0.050980393, 1)
 
 [node name="StartScreen" type="Control" parent="."]
 visible = false

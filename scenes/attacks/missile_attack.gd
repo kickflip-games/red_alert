@@ -71,7 +71,7 @@ func spawn_missile():
 	# Play shooting sound effect
 	SoundManager.play_sound_with_pitch(SHOOT_SFX, randf_range(0.8, 1.2))
 	
-	print("Spawned missile at: ", spawn_position, " (", _missiles_spawned, "/", missile_count, ")")
+	#print("Spawned missile at: ", spawn_position, " (", _missiles_spawned, "/", missile_count, ")")
 
 func _immediate_cleanup():
 	_cleanup_missiles(0)

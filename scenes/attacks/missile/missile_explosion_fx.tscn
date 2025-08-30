@@ -1,0 +1,188 @@
+[gd_scene load_steps=41 format=3 uid="uid://ouibpkfc5ldb"]
+
+[ext_resource type="Texture2D" uid="uid://dfti6kfs3nf2a" path="res://assets/textures/explosion_fx/small_explosion/0.png" id="1_q23uv"]
+[ext_resource type="Script" uid="uid://b1rji85gmxpbd" path="res://scenes/attacks/missile/missile_explosion_fx.gd" id="1_viv7t"]
+[ext_resource type="Texture2D" uid="uid://mwxsgs2bq6t4" path="res://assets/textures/explosion_fx/small_explosion/1.png" id="2_viv7t"]
+[ext_resource type="Texture2D" uid="uid://bxb7wbycen452" path="res://assets/textures/explosion_fx/small_explosion/2.png" id="3_ce1i0"]
+[ext_resource type="Texture2D" uid="uid://dy4j3u11ssnw7" path="res://assets/textures/explosion_fx/small_explosion/3.png" id="4_a7pg3"]
+[ext_resource type="Texture2D" uid="uid://b6tvwxu8k522q" path="res://assets/textures/explosion_fx/small_explosion/4.png" id="5_jx2ss"]
+[ext_resource type="Texture2D" uid="uid://5gfhd3psrsax" path="res://assets/textures/explosion_fx/small_explosion/5.png" id="6_ngejv"]
+[ext_resource type="Texture2D" uid="uid://b47tjknl4yo1" path="res://assets/textures/explosion_fx/small_explosion/6.png" id="7_c7dml"]
+[ext_resource type="Texture2D" uid="uid://dwejt7owo7c3o" path="res://assets/textures/explosion_fx/small_explosion/7.png" id="8_psysu"]
+[ext_resource type="Texture2D" uid="uid://bxjpmx6ywdyad" path="res://assets/textures/explosion_fx/small_explosion/8.png" id="9_1v873"]
+[ext_resource type="Texture2D" uid="uid://copcgjmw3cch1" path="res://assets/textures/explosion_fx/small_explosion/9.png" id="10_ilvs2"]
+[ext_resource type="Texture2D" uid="uid://bwpxielbycn46" path="res://assets/textures/explosion_fx/small_explosion/10.png" id="11_wo0kq"]
+[ext_resource type="Texture2D" uid="uid://bo6oiyh771qti" path="res://assets/textures/explosion_fx/small_explosion/11.png" id="12_yyhxe"]
+[ext_resource type="Texture2D" uid="uid://dky40ndj66rtp" path="res://assets/textures/explosion_fx/small_explosion/12.png" id="13_tcs64"]
+[ext_resource type="Texture2D" uid="uid://c6rsdqfuwx240" path="res://assets/textures/explosion_fx/small_explosion/13.png" id="14_45qqe"]
+[ext_resource type="Texture2D" uid="uid://3tlr61gwrbvg" path="res://assets/textures/explosion_fx/small_explosion/14.png" id="15_jcmmg"]
+[ext_resource type="Texture2D" uid="uid://dvjgiu17w4qyu" path="res://assets/textures/explosion_fx/small_explosion/15.png" id="16_0ij3w"]
+[ext_resource type="Texture2D" uid="uid://clqxxcwl36x18" path="res://assets/textures/explosion_fx/small_explosion/16.png" id="17_p5txt"]
+[ext_resource type="Texture2D" uid="uid://bhdpfnjuki5jp" path="res://assets/textures/explosion_fx/small_explosion/17.png" id="18_0gudk"]
+[ext_resource type="Texture2D" uid="uid://cknb0v6oqe4vg" path="res://assets/textures/explosion_fx/small_explosion/18.png" id="19_32pm4"]
+[ext_resource type="Texture2D" uid="uid://cuv13022jslml" path="res://assets/textures/explosion_fx/small_explosion/19.png" id="20_n51cd"]
+[ext_resource type="Texture2D" uid="uid://0gkd2oo87ivt" path="res://assets/textures/explosion_fx/small_explosion/20.png" id="21_xq11l"]
+[ext_resource type="Texture2D" uid="uid://bx5ifleb0eby2" path="res://assets/textures/explosion_fx/small_explosion/21.png" id="22_qq83q"]
+[ext_resource type="Texture2D" uid="uid://bw6s3cb3face1" path="res://assets/textures/explosion_fx/small_explosion/22.png" id="23_jo81y"]
+[ext_resource type="Texture2D" uid="uid://be82t18cln5hj" path="res://assets/textures/explosion_fx/small_explosion/23.png" id="24_mvy1r"]
+[ext_resource type="Texture2D" uid="uid://bwvkl1i85xqfm" path="res://assets/textures/explosion_fx/small_explosion/24.png" id="25_amrey"]
+[ext_resource type="Texture2D" uid="uid://bfeprvi7mvkgc" path="res://assets/textures/explosion_fx/small_explosion/25.png" id="26_4pca0"]
+[ext_resource type="Texture2D" uid="uid://lyplk6aibqg0" path="res://assets/textures/explosion_fx/small_explosion/26.png" id="27_tifmv"]
+[ext_resource type="Texture2D" uid="uid://drgeo5lh6uvao" path="res://assets/textures/explosion_fx/small_explosion/27.png" id="28_6u8wj"]
+[ext_resource type="Texture2D" uid="uid://cuhcx3m8xskj4" path="res://assets/textures/explosion_fx/small_explosion/28.png" id="29_kvmp3"]
+[ext_resource type="Texture2D" uid="uid://x1f2iaxixv06" path="res://assets/textures/explosion_fx/small_explosion/29.png" id="30_oq6ug"]
+[ext_resource type="Texture2D" uid="uid://vgtrbmuiv184" path="res://assets/textures/explosion_fx/small_explosion/30.png" id="31_gv2qv"]
+[ext_resource type="Texture2D" uid="uid://c7buj116myjrw" path="res://assets/textures/explosion_fx/small_explosion/31.png" id="32_fvpfe"]
+[ext_resource type="Texture2D" uid="uid://c4sbufcoblab6" path="res://assets/textures/explosion_fx/small_explosion/32.png" id="33_68faa"]
+
+[sub_resource type="Gradient" id="Gradient_psqhx"]
+colors = PackedColorArray(0, 0, 0, 1, 0.22, 0.22, 0.22, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_fyuiw"]
+gradient = SubResource("Gradient_psqhx")
+
+[sub_resource type="Curve" id="Curve_qj5wn"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_g3mel"]
+curve = SubResource("Curve_qj5wn")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_im20w"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 5.3
+spread = 180.0
+initial_velocity_min = 80.0
+initial_velocity_max = 100.0
+gravity = Vector3(0, 0, 0)
+scale_min = 10.0
+scale_max = 20.0
+scale_curve = SubResource("CurveTexture_g3mel")
+color = Color(0.15, 0.15, 0.15, 1)
+color_ramp = SubResource("GradientTexture1D_fyuiw")
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3yfxu"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_q23uv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_viv7t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_ce1i0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_a7pg3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_jx2ss")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_ngejv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_c7dml")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_psysu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_1v873")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_ilvs2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_wo0kq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_yyhxe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_tcs64")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_45qqe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_jcmmg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_0ij3w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_p5txt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_0gudk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_32pm4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_n51cd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_xq11l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_qq83q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_jo81y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_mvy1r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_amrey")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_4pca0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_tifmv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_6u8wj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_kvmp3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_oq6ug")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_gv2qv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_fvpfe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_68faa")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="missile_explosion_fx" type="Node2D"]
+script = ExtResource("1_viv7t")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 12
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_im20w")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
+scale = Vector2(3, 3)
+sprite_frames = SubResource("SpriteFrames_3yfxu")
+frame = 32
+frame_progress = 1.0
+speed_scale = 3.0
+offset = Vector2(-1.62, -16.69)
