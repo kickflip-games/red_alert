@@ -1,16 +1,22 @@
+class_name CollectibleSpawner
 extends Node2D
+
 
 signal score_updated(new_score)
 signal letter_collected(letter, word_progress)
 signal word_completed(word)
+signal game_completed()  # New signal for game completion
 
-@export var collectible_scene: PackedScene
+@export var collectible_scene: PackedScene = preload("res://scenes/collectibles/Collectible.tscn")
 @export var spawn_margin: float = 50.0
 @export var min_distance_from_player: float = 100.0
 @export var game_duration: float = 100.0
-@export var min_spawn_interval: float = 12  # Minimum seconds between spawns
+@export var min_spawn_interval: float =  12  # Minimum seconds between spawns
+@export var pointer_scene: PackedScene = preload("res://scenes/ui/pointer.tscn")
+
 
 var current_collectible: RigidBody2D = null
+var pointer: Pointer = null
 var player_reference: Node2D = null
 var screen_size: Vector2
 var total_score: int = 0
@@ -20,6 +26,7 @@ var target_word: String = "BISCUIT"
 var collected_letters: Array[String] = []
 var current_letter_index: int = 0
 var total_words_completed: int = 0
+var game_is_complete: bool = false  # New flag to track game completion
 
 # Timing control
 var game_start_time: float
@@ -51,19 +58,23 @@ func _process(_delta):
 	var current_time = Time.get_time_dict_from_system().hour * 3600 + Time.get_time_dict_from_system().minute * 60 + Time.get_time_dict_from_system().second
 	var elapsed_time = current_time - game_start_time
 	
-	if elapsed_time >= game_duration:
-		can_spawn = false
+	if elapsed_time >= game_duration and not game_is_complete:
+		trigger_game_complete()
 
 func spawn_collectible():
 	if not collectible_scene:
 		print("Error: No collectible scene assigned to spawner")
 		return
 	
+	# Don't spawn if game is complete
+	if game_is_complete:
+		return
+	
 	# Don't spawn if one already exists
 	if current_collectible and is_instance_valid(current_collectible):
 		return
 	
-	# Don't spawn if game time is up or we've completed all possible words
+	# Don't spawn if game time is up
 	if not can_spawn:
 		return
 	
@@ -90,6 +101,12 @@ func spawn_collectible():
 	
 	# Add to scene
 	add_child(current_collectible)
+	
+	if current_letter_index == 0:
+		pointer = pointer_scene.instantiate()
+		add_child(pointer)
+		pointer.set_refs(player_reference, current_collectible)
+		
 
 func get_safe_spawn_position() -> Vector2:
 	var attempts = 0
@@ -114,6 +131,10 @@ func get_safe_spawn_position() -> Vector2:
 	return screen_size * 0.5
 
 func on_collectible_collected(letter: String, points: int):
+	
+	if current_letter_index == 0:
+		pointer.queue_free()
+	
 	total_score += points
 	collected_letters.append(letter)
 	
@@ -125,8 +146,11 @@ func on_collectible_collected(letter: String, points: int):
 	if collected_letters.size() == target_word.length():
 		total_words_completed += 1
 		word_completed.emit(target_word)
-		reset_word_progress()
 		print("Word completed! Total completions: ", total_words_completed)
+		
+		# Trigger game completion after first word is completed
+		trigger_game_complete()
+		return
 	else:
 		# Move to next letter
 		current_letter_index += 1
@@ -134,12 +158,40 @@ func on_collectible_collected(letter: String, points: int):
 	# Clear reference to collected item
 	current_collectible = null
 	
-	# Start spawn timer to enforce minimum interval
-	spawn_timer.start()
+	# Start spawn timer to enforce minimum interval (only if game isn't complete)
+	if not game_is_complete:
+		spawn_timer.start()
+
+func trigger_game_complete():
+	"""Handles game completion - called when word is completed or time runs out"""
+	if game_is_complete:
+		return  # Prevent multiple calls
+	
+	game_is_complete = true
+	can_spawn = false
+	
+	# Clean up any existing collectible
+	if current_collectible and is_instance_valid(current_collectible):
+		current_collectible.queue_free()
+		current_collectible = null
+	
+	# Clean up pointer if it exists
+	if pointer and is_instance_valid(pointer):
+		pointer.queue_free()
+		pointer = null
+	
+	# Stop the spawn timer
+	if spawn_timer:
+		spawn_timer.stop()
+	
+	# Emit game completion signal
+	game_completed.emit()
+	
+	print("Game Complete!")
 
 func _on_spawn_timer_timeout():
-	# Only spawn if we're still within game time and haven't completed too many words
-	if can_spawn:
+	# Only spawn if game isn't complete
+	if not game_is_complete and can_spawn:
 		spawn_collectible()
 
 func get_word_progress() -> String:
@@ -176,10 +228,14 @@ func get_time_remaining() -> float:
 	var elapsed_time = current_time - game_start_time
 	return max(0, game_duration - elapsed_time)
 
+func is_game_complete() -> bool:
+	"""Returns whether the game has been completed"""
+	return game_is_complete
+
 func force_spawn():
 	# Utility function to manually spawn collectible (respects timing constraints)
 	if current_collectible and is_instance_valid(current_collectible):
 		current_collectible.queue_free()
 	
-	if can_spawn and not spawn_timer.time_left > 0:
+	if can_spawn and not spawn_timer.time_left > 0 and not game_is_complete:
 		spawn_collectible()

@@ -19,7 +19,7 @@ var is_timer_running: bool = false
 @onready var restart_button = $HUD/EndScreen/RestartButton
 @onready var player = $Player
 @onready var attack_manager = $AttackManager
-@onready var collectable_spawener = $CollectibleSpawner
+@onready var collectable_spawener:CollectibleSpawner = $CollectibleSpawner
 #@onready var missile_spawner = $MissileSpawner
 const GAME_MUSIC = preload("res://assets/audio/music/game_music.ogg")
 const MENU_MUSIC = preload("res://assets/audio/music/menu-music-OGG.ogg")
@@ -29,7 +29,7 @@ func _ready():
 	start_button.pressed.connect(_on_start_button_pressed)
 	restart_button.pressed.connect(_on_restart_button_pressed)
 	player.player_died.connect(player_died)
-	attack_manager.game_complete.connect(show_game_over)
+	collectable_spawener.game_completed.connect(show_game_over)
 	
 	# Initialize screens
 	show_start_screen()
@@ -96,10 +96,10 @@ func show_game_over():
 	SoundManager.play_music(MENU_MUSIC, 0.5)
 	
 	
-	if attack_manager.game_timer >= attack_manager.game_duration:
-		$HUD/EndScreen/GameTxt.text = "You survived!"
+	if collectable_spawener.game_is_complete:
+		$HUD/EndScreen/GameTxt.text = "Yummy!"
 	else:
-		$HUD/EndScreen/GameTxt.text = "Died after %d seconds" % int(attack_manager.game_timer)
+		$HUD/EndScreen/GameTxt.text = "Aww. Im sure you can do it! "
 	
 	# Remove fade overlay
 	fade_overlay.queue_free()
