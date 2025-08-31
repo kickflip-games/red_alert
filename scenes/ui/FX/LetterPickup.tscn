@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3 uid="uid://yu8new0hrvrr"]
+
+[sub_resource type="Gradient" id="Gradient_qyac0"]
+colors = PackedColorArray(1, 0, 0, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_r6n6p"]
+gradient = SubResource("Gradient_qyac0")
+
+[sub_resource type="Curve" id="Curve_qj5wn"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_g3mel"]
+curve = SubResource("Curve_qj5wn")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_aijax"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 5.3
+spread = 180.0
+initial_velocity_min = 25.0
+initial_velocity_max = 100.0
+gravity = Vector3(0, 0, 0)
+scale_min = 10.0
+scale_max = 20.0
+scale_curve = SubResource("CurveTexture_g3mel")
+color_ramp = SubResource("GradientTexture1D_r6n6p")
+
+[node name="LetterPickup" type="GPUParticles2D"]
+amount = 10
+explosiveness = 1.0
+randomness = 1.0
+process_material = SubResource("ParticleProcessMaterial_aijax")

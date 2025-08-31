@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://c7etnmicu136n"]
+[gd_scene load_steps=22 format=3 uid="uid://c7etnmicu136n"]
 
 [ext_resource type="PackedScene" uid="uid://dsmsb7kwv0ce1" path="res://managers/camera_2d.tscn" id="1_c01mt"]
 [ext_resource type="Script" uid="uid://cfeicvpmqto3f" path="res://scenes/Main.gd" id="1_jlsqs"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://bke4qrafgvt22" path="res://scenes/attacks/MissileAttack.tscn" id="6_wp0k4"]
 [ext_resource type="PackedScene" uid="uid://bbilyyr7k5y11" path="res://scenes/attacks/BulletStreamAttack.tscn" id="7_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://cxaxhc521axja" path="res://scenes/collectibles/CollectibleSpawner.tscn" id="13_qmy6f"]
+[ext_resource type="PackedScene" uid="uid://eyugwkkpnj6t" path="res://scenes/collectibles/Collectible.tscn" id="14_mwfav"]
 
 [sub_resource type="Environment" id="Environment_nxtc6"]
 glow_enabled = true
@@ -72,19 +73,6 @@ attack_waves_container = NodePath("EasyWaves")
 
 [node name="EasyWaves" type="Node2D" parent="AttackManager"]
 
-[node name="MissileWave" type="Node2D" parent="AttackManager/EasyWaves"]
-script = ExtResource("6_qmy6f")
-wave_duration = 30.0
-metadata/_custom_type_script = "uid://8e8b6xpph6c"
-
-[node name="MissileAttack" parent="AttackManager/EasyWaves/MissileWave" instance=ExtResource("6_wp0k4")]
-position = Vector2(574, 331)
-spawn_delay = 0.0
-spawn_radius = 600.0
-max_num_active = 8
-missile_count = 50
-attack_duration = 30.0
-
 [node name="Wave0" parent="AttackManager/EasyWaves" instance=ExtResource("6_bjd11")]
 wave_duration = 7.0
 disable_child_attacks_on_finish = false
@@ -92,6 +80,20 @@ notes = "One attack"
 
 [node name="BulletStreamAttack" parent="AttackManager/EasyWaves/Wave0" instance=ExtResource("7_qmy6f")]
 position = Vector2(0, 315)
+
+[node name="MissileWave0" type="Node2D" parent="AttackManager/EasyWaves"]
+script = ExtResource("6_qmy6f")
+end_delay = 0.0
+disable_child_attacks_on_finish = false
+metadata/_custom_type_script = "uid://8e8b6xpph6c"
+
+[node name="MissileAttack" parent="AttackManager/EasyWaves/MissileWave0" instance=ExtResource("6_wp0k4")]
+position = Vector2(574, 331)
+spawn_delay = 0.0
+spawn_radius = 600.0
+missile_count = 15
+fire_rate = 0.05000000000291038
+attack_duration = 10.0
 
 [node name="Wave1" parent="AttackManager/EasyWaves" instance=ExtResource("6_bjd11")]
 wave_duration = 7.0
@@ -186,6 +188,22 @@ stream_width = 1000.0
 bullet_spacing = 30.0
 fire_rate = 0.0
 bullet_count = 25
+
+[node name="MissileWave" type="Node2D" parent="AttackManager/EasyWaves"]
+script = ExtResource("6_qmy6f")
+wave_duration = 15.0
+end_delay = 0.0
+disable_child_attacks_on_finish = false
+metadata/_custom_type_script = "uid://8e8b6xpph6c"
+
+[node name="MissileAttack" parent="AttackManager/EasyWaves/MissileWave" instance=ExtResource("6_wp0k4")]
+position = Vector2(574, 331)
+spawn_delay = 0.0
+spawn_radius = 600.0
+max_num_active = 8
+missile_count = 30
+fire_rate = 0.19999999999708962
+attack_duration = 10.0
 
 [node name="MovingWave0" parent="AttackManager/EasyWaves" instance=ExtResource("6_bjd11")]
 wave_duration = 5.0
@@ -289,11 +307,12 @@ heart_full_texture = ExtResource("5_c01mt")
 heart_empty_texture = ExtResource("6_nxtc6")
 
 [node name="CollectibleSpawner" parent="." instance=ExtResource("13_qmy6f")]
+collectible_scene = ExtResource("14_mwfav")
 
 [node name="Bounds" type="Node2D" parent="."]
 
 [node name="LeftWall" type="StaticBody2D" parent="Bounds"]
-position = Vector2(0, 339)
+position = Vector2(33, 339)
 rotation = 1.5707964
 collision_layer = 8
 collision_mask = 4
@@ -302,7 +321,7 @@ collision_mask = 4
 shape = SubResource("WorldBoundaryShape2D_bjd11")
 
 [node name="RightWall" type="StaticBody2D" parent="Bounds"]
-position = Vector2(1212, 354)
+position = Vector2(1135, 354)
 rotation = -1.5707964
 collision_layer = 8
 collision_mask = 4
@@ -311,7 +330,7 @@ collision_mask = 4
 shape = SubResource("WorldBoundaryShape2D_bjd11")
 
 [node name="BottomWall" type="StaticBody2D" parent="Bounds"]
-position = Vector2(610, 643)
+position = Vector2(610, 613)
 collision_layer = 8
 collision_mask = 4
 
@@ -319,7 +338,7 @@ collision_mask = 4
 shape = SubResource("WorldBoundaryShape2D_bjd11")
 
 [node name="TopWall" type="StaticBody2D" parent="Bounds"]
-position = Vector2(610, 5)
+position = Vector2(610, 41)
 rotation = -3.1415927
 collision_layer = 8
 collision_mask = 4

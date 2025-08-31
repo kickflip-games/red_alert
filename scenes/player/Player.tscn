@@ -81,10 +81,10 @@ texture = ExtResource("2_gfjak")
 
 [node name="CollisionArea" type="Area2D" parent="."]
 collision_layer = 2
-collision_mask = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionArea"]
 shape = SubResource("CircleShape2D_4kuee")
+debug_color = Color(0, 0, 0, 0.41960785)
 
 [node name="CollectableArea" type="Area2D" parent="."]
 collision_layer = 2

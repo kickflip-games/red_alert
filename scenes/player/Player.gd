@@ -42,6 +42,7 @@ var is_dashing := false
 var is_circling := false
 var is_invincible := false
 var is_hit_paused := false
+var is_dead:= false
 var circle_angle := 0.0
 var last_rotation := 0.0
 var dash_timer := 0.0
@@ -410,10 +411,9 @@ func _get_dash_percent_ready() -> float:
 
 # --- Enhanced Collision & Damage ---
 func _on_body_entered(body: Node2D):
-	if is_dashing or is_invincible:
+	if is_dashing or is_invincible or is_dead:
 		return
 	
-
 	take_damage(1)
 	body.queue_free()
 
@@ -456,7 +456,7 @@ func become_invincible():
 func die():
 	if not is_instance_valid(sprite):
 		return
-
+	is_dead = true
 	print("Player has died")
 	player_died.emit()
 

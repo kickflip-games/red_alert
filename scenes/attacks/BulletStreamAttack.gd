@@ -104,7 +104,7 @@ func spawn_bullet():
 	if not BULLET_SCENE or _bullets_spawned >= bullet_count:
 		return
 
-	SoundManager.play_sound_with_pitch(SHOOT_SFX, randf_range(0.5, 1.0))
+	SoundManager.play_sound_with_pitch(SHOOT_SFX, 1)
 	var bullet = BULLET_SCENE.instantiate()
 	get_parent().add_child(bullet)
 

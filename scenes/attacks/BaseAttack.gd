@@ -47,7 +47,7 @@ func show_warning():
 		return
 	
 	warning_node.visible = true
-	SoundManager.play_sound_with_pitch(ALERT_SFX, randf_range(0.5, 1.0))
+	SoundManager.play_sound_with_pitch(ALERT_SFX, 1)
 	
 	# Use safe tween management
 	_safe_kill_tween(warning_tween)

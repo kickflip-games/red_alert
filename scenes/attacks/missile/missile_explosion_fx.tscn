@@ -36,7 +36,7 @@
 [ext_resource type="Texture2D" uid="uid://c4sbufcoblab6" path="res://assets/textures/explosion_fx/small_explosion/32.png" id="33_68faa"]
 
 [sub_resource type="Gradient" id="Gradient_psqhx"]
-colors = PackedColorArray(0, 0, 0, 1, 0.22, 0.22, 0.22, 0)
+colors = PackedColorArray(1, 0, 0, 1, 0.22, 0.22, 0.22, 0)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_fyuiw"]
 gradient = SubResource("Gradient_psqhx")

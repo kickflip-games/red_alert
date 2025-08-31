@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://bib5lohuq1xli"]
+[gd_scene load_steps=10 format=3 uid="uid://bib5lohuq1xli"]
 
 [ext_resource type="Script" uid="uid://ct0mjkwg5mxy8" path="res://scenes/ui/HUD.gd" id="1_r8hcy"]
 [ext_resource type="Texture2D" uid="uid://blmdh84m208op" path="res://assets/textures/heart/heart_full.png" id="2_atyv1"]
 [ext_resource type="Texture2D" uid="uid://1r7uxcup4ew3" path="res://assets/textures/logo.png" id="3_6ll6g"]
 [ext_resource type="FontFile" uid="uid://b61dtuoni8re8" path="res://assets/fonts/game_font.ttf" id="4_ig75s"]
+[ext_resource type="PackedScene" uid="uid://cmdf5vqe2nbnu" path="res://scenes/ui/FX/WordPickup.tscn" id="5_jlufg"]
 [ext_resource type="Script" uid="uid://br8qvmjjmcmg" path="res://scenes/ui/WordDisplay.gd" id="5_rnyu1"]
 
 [sub_resource type="Theme" id="Theme_atyv1"]
@@ -91,15 +92,19 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "Wavename"
 
-[node name="WordDisplay" type="RichTextLabel" parent="GameUi"]
+[node name="WordFX" parent="GameUi" instance=ExtResource("5_jlufg")]
+position = Vector2(561, 597)
+amount = 15
+
+[node name="WordDisplay" type="RichTextLabel" parent="GameUi" node_paths=PackedStringArray("word_fx")]
 clip_contents = false
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -163.0
-offset_bottom = -63.0
+offset_top = -105.0
+offset_bottom = -5.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/default_color = Color(0.10980392, 0.10980392, 0.10980392, 0.54509807)
@@ -113,6 +118,9 @@ scroll_active = false
 horizontal_alignment = 1
 script = ExtResource("5_rnyu1")
 collected_color = Color(1, 0.050980393, 0.050980393, 1)
+wave_amplitude = 15.0
+wave_frequency = 8.0
+word_fx = NodePath("../WordFX")
 
 [node name="StartScreen" type="Control" parent="."]
 visible = false
