@@ -19,6 +19,7 @@ var is_timer_running: bool = false
 @onready var restart_button = $HUD/EndScreen/RestartButton
 @onready var player = $Player
 @onready var attack_manager = $AttackManager
+@onready var collectable_spawener = $CollectibleSpawner
 #@onready var missile_spawner = $MissileSpawner
 const GAME_MUSIC = preload("res://assets/audio/music/game_music.ogg")
 const MENU_MUSIC = preload("res://assets/audio/music/menu-music-OGG.ogg")
@@ -66,7 +67,7 @@ func start_game():
 	# Initialize/reset your game objects
 	attack_manager.start_game()
 	#missile_spawner.can_spawn = true
-	# etc.
+	collectable_spawener.spawn_collectible()
 	SoundManager.play_music(GAME_MUSIC, 0.5)
 
 func show_game_over():

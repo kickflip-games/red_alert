@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://corxhrleskgv"]
+[gd_scene load_steps=14 format=3 uid="uid://corxhrleskgv"]
 
 [ext_resource type="Script" uid="uid://ct2s5gu2mvdyu" path="res://scenes/player/Player.gd" id="1_p0vlq"]
 [ext_resource type="Texture2D" uid="uid://dnj15kqmp5xsi" path="res://assets/textures/ship.png" id="2_4kuee"]
 [ext_resource type="Texture2D" uid="uid://cyedncb0hj8an" path="res://assets/textures/crosshair102.png" id="2_gfjak"]
 [ext_resource type="Texture2D" uid="uid://o686rxigi4bg" path="res://assets/textures/smoke/no_border/smokeWhite2.png" id="4_tpg5x"]
 [ext_resource type="Texture2D" uid="uid://ngvl70ryox6o" path="res://assets/textures/particles/circles/circle_05.png" id="5_tpg5x"]
+[ext_resource type="PackedScene" uid="uid://thq4c0pothu5" path="res://scenes/player/player_explosion_fx.tscn" id="6_c3xxp"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4kuee"]
 radius = 4.0
@@ -142,3 +143,6 @@ position = Vector2(-2, -16)
 
 [node name="wing2_marker" type="Marker2D" parent="."]
 position = Vector2(-2, 17)
+
+[node name="explosion_fx" parent="." instance=ExtResource("6_c3xxp")]
+playOnStart = false

@@ -60,6 +60,7 @@ var sprite_tween: Tween
 
 const HURT_SFX = preload("res://assets/audio/sfx/hurt-sound.ogg")
 const DASH_SFX = preload("res://assets/audio/sfx/dash-sound.ogg")
+const EXPLOSION_FX = preload("res://scenes/player/player_explosion_fx.tscn")
 
 # --- Signals ---
 signal hp_changed(current_hp: int)
@@ -359,6 +360,10 @@ func die():
 	is_dead = true
 	print("Player has died")
 	player_died.emit()
+	var explosion_instance = EXPLOSION_FX.instantiate()
+	explosion_instance.global_position = global_position
+	get_tree().get_root().add_child(explosion_instance)
+	
 
 	_safe_kill_tween(sprite_tween)
 	sprite_tween = _create_safe_tween()

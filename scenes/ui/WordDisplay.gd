@@ -72,8 +72,8 @@ func animate_word_completion():
 	tween.parallel().tween_property(self, "scale", Vector2(1.3, 1.3), 0.3)
 	tween.parallel().tween_property(self, "modulate", Color.GOLD, 0.3)
 	
-	await tween.finished
-	
-	var tween2 = create_tween().set_trans(Tween.TRANS_QUAD)
-	tween2.parallel().tween_property(self, "scale", Vector2(1.0, 1.0), 0.3)
-	tween2.parallel().tween_property(self, "modulate", Color.WHITE, 0.3)
+	#await tween.finished
+	#
+	#var tween2 = create_tween().set_trans(Tween.TRANS_QUAD)
+	#tween2.parallel().tween_property(self, "scale", Vector2(1.0, 1.0), 0.3)
+	#tween2.parallel().tween_property(self, "modulate", Color.WHITE, 0.3)

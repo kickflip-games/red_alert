@@ -19,6 +19,7 @@ RichTextLabel/fonts/normal_font = ExtResource("4_ig75s")
 script = ExtResource("1_r8hcy")
 
 [node name="GameUi" type="Control" parent="."]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -173,11 +174,14 @@ offset_top = -201.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 30
 theme_override_fonts/normal_font = ExtResource("4_ig75s")
 theme_override_font_sizes/normal_font_size = 50
-text = "Mouse to move
-Click to dash
-SURVIVE 100 SECONDS
+bbcode_enabled = true
+text = "[pulse freq=1.0 color=#ffffff80 ease=-2.0 ] Mouse to move
+[wave ]Click to DASH [/wave]
+SURVIVE 100 SECONDS[/pulse]
 
 "
 fit_content = true
@@ -185,7 +189,6 @@ horizontal_alignment = 1
 vertical_alignment = 2
 
 [node name="EndScreen" type="Control" parent="."]
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

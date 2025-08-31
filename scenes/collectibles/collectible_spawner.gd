@@ -8,7 +8,7 @@ signal word_completed(word)
 @export var spawn_margin: float = 50.0
 @export var min_distance_from_player: float = 100.0
 @export var game_duration: float = 100.0
-@export var min_spawn_interval: float = 8  # Minimum seconds between spawns
+@export var min_spawn_interval: float = 12  # Minimum seconds between spawns
 
 var current_collectible: RigidBody2D = null
 var player_reference: Node2D = null
@@ -44,7 +44,7 @@ func _ready():
 		print("Warning: No player found in 'player' group")
 	
 	# Spawn first collectible immediately
-	spawn_collectible()
+	#spawn_collectible()
 
 func _process(_delta):
 	# Check if game time has exceeded duration

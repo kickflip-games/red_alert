@@ -4,22 +4,21 @@ class_name AttackWave
 signal wave_complete(wave:AttackWave)
 signal wave_started(wave:AttackWave)
 
-
 ## Delay before this wave starts
-@export var start_delay: float = 0.0  
+@export var start_delay: float = 0.0
 
 ## Duration this wave is active
-@export var wave_duration: float = 10.0  
+@export var wave_duration: float = 10.0
 
 ## Delay after wave before next one
-@export var end_delay: float = 1.0  
+@export var end_delay: float = 1.0
 
 ## Stop children on wave end
-@export var disable_child_attacks_on_finish: bool = true 
+@export var disable_child_attacks_on_finish: bool = true
 
-## Time bw attacks 
-@export var stagger_attacks: bool = false  
-@export var stagger_delay: float = 0.25  
+## Time bw attacks
+@export var stagger_attacks: bool = false
+@export var stagger_delay: float = 0.25
 
 ## Some notes about this attack
 @export_multiline var notes: String
@@ -30,7 +29,7 @@ var is_active: bool = false
 var attacks:Array[BaseAttack]
 
 var total_duration:
-	get: 
+	get:
 		return start_delay + wave_duration + end_delay
 
 
@@ -90,3 +89,9 @@ func _stagger_children():
 	for attack in attacks:
 		attack.start_attack()
 		await get_tree().create_timer(stagger_delay).timeout
+
+# New function to initiate the wave after the start_delay
+func initiate_wave():
+	if start_delay > 0:
+		await get_tree().create_timer(start_delay).timeout
+	start_wave()
