@@ -6,7 +6,7 @@ signal collected(letter, points)
 @export var points_value: int = 10
 @export var initial_speed: float = 250.0
 @export var bounce_damping: float = 0.8
-@export var evasion_force: float = 400.0
+@export var evasion_force: float = 200.0
 @export var evasion_distance: float = 120.0
 @export var min_speed: float = 50.0  # Minimum speed to maintain
 @export var max_speed: float = 400.0  # Maximum speed limit

@@ -10,7 +10,7 @@ extends Node2D
 @export var dash_duration := 0.15  
 @export var dash_cooldown := 1.5
 @export var dash_start_boost := 1.5
-@export var max_hp := 3
+@export var max_hp := 5
 @export var invincibility_duration: float = 1.2
 
 # --- Circling behavior ---
@@ -18,22 +18,11 @@ extends Node2D
 @export var circle_speed := 300.0
 @export var circle_orbit_radius := 60.0
 
-# --- Turn effects ---
-@export var sharp_turn_threshold := 2.0
-@export var curved_trail_segments := 8
-
 # --- Juice FX ---
 @export var hit_pause_duration := 0.095
 @export var dash_bloom_intensity := 1.8
 @export var idle_pulse_speed := 2.0
 @export var dash_dial_radius := 40.0
-
-# --- Trail settings ---
-@export var max_trail_points := 15
-@export var max_movement_trail_points := 20
-@export var max_turn_trail_points := 20
-@export var dash_trail_fade_duration := 0.2
-@export var turn_trail_fade_speed := 1.0
 
 # --- State ---
 var velocity := Vector2.ZERO
@@ -50,35 +39,24 @@ var dash_cooldown_timer := 0.0
 var dash_direction := Vector2.ZERO
 var target_position := Vector2.ZERO
 var velocity_history: Array[Vector2] = []
-var is_sharp_turning := false
 
-# --- Trail system ---
-var dash_trail_points: Array = []
-var movement_trail_points: Array = []
-var turn_trail_points_left: Array = []
-var turn_trail_points_right: Array = []
+# --- Trail reference ---
+var current_trail: Trail
 
 # --- Tween references ---
 var sprite_tween: Tween
-var dash_trail_tween: Tween
-var turn_trail_left_tween: Tween
-var turn_trail_right_tween: Tween
 
 # --- Nodes ---
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var reticle: Sprite2D = $Reticle
-@onready var dash_particles: GPUParticles2D = $DashParticles
-@onready var movement_particles: GPUParticles2D = $MovementParticles
-@onready var idle_pulse_particles: GPUParticles2D = $IdlePulseParticles
+@onready var dash_particles: CPUParticles2D = $DashParticles
+@onready var movement_particles: CPUParticles2D = $MovementParticles
+@onready var damage_particles: CPUParticles2D = $DamageParticles
+@onready var idle_pulse_particles: CPUParticles2D = $IdlePulseParticles
 @onready var collision_area: Area2D = $CollisionArea
 @onready var collectable_area: Area2D = $CollectableArea
-@onready var turn_fx_left: Line2D = $TurnFXLeft
-@onready var turn_fx_right: Line2D = $TurnFXRight
-@onready var dash_trail: Line2D = $DashTrail
-@onready var movement_trail: Line2D = $MovementTrail
 @onready var dash_dial: Line2D = $DashDial
 @onready var dash_dial_bg: Line2D = $DashDialBG
-
 
 const HURT_SFX = preload("res://assets/audio/sfx/hurt-sound.ogg")
 const DASH_SFX = preload("res://assets/audio/sfx/dash-sound.ogg")
@@ -99,13 +77,16 @@ func _ready():
 	emit_signal("hp_changed", current_hp)
 	last_rotation = rotation
 	
-	_setup_movement_trail()
 	_setup_dash_dial()
+	_create_movement_trail()
 
-func _setup_movement_trail():
-	#movement_trail.width = 2.0
-	movement_trail.default_color = Color(1.0, 1.0, 1.0, 0.7)
-	movement_trail.visible = true
+func _create_movement_trail():
+	current_trail = Trail.create()
+	add_child(current_trail)
+	
+	# Style the movement trail
+	current_trail.width = 25.0
+	current_trail.default_color = Color(0.7, 0.9, 1.2, 0.2)
 
 func _setup_dash_dial():
 	# Background circle (full circle)
@@ -126,7 +107,6 @@ func _process(delta):
 	# Update dash timers and movement
 	if is_dashing:
 		_handle_dash_movement(delta)
-		_update_dash_trail()
 		_apply_dash_bloom_effect()
 		dash_timer -= delta
 		if dash_timer <= 0:
@@ -135,7 +115,6 @@ func _process(delta):
 		_handle_mouse_input()
 		_apply_momentum_movement(delta)
 		dash_cooldown_timer = max(dash_cooldown_timer - delta, 0.0)
-		_update_movement_trail()
 		_update_movement_particles()
 
 	_update_reticle(delta)
@@ -168,12 +147,6 @@ func trigger_hit_pause():
 	Engine.time_scale = 0.1
 
 	_safe_kill_tween(sprite_tween)
-	sprite_tween = _create_safe_tween()
-	
-	sprite_tween.tween_property(sprite, "scale", Vector2(1.3, 0.7), hit_pause_duration * 0.3) \
-				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	sprite_tween.tween_property(sprite, "scale", Vector2.ONE, hit_pause_duration * 0.7) \
-				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 	await get_tree().create_timer(hit_pause_duration).timeout
 	Engine.time_scale = 1.0
@@ -190,11 +163,13 @@ func start_dash():
 	dash_cooldown_timer = dash_cooldown
 	dash_direction = (target_position - global_position).normalized()
 	
-	_reset_trail(dash_trail_points, dash_trail)
-	
 	# Enhanced visual impact
 	sprite.modulate = Color(dash_bloom_intensity, dash_bloom_intensity, dash_bloom_intensity + 0.3, 0.9)
-	sprite.scale = Vector2(1.3, 0.7)
+	
+	# Make trail more prominent during dash
+	if current_trail:
+		current_trail.width = 30.0
+		current_trail.default_color = Color(1.0, 1.3, 1.8, 0.5)
 	
 	# Particle effects
 	dash_particles.emitting = true
@@ -227,8 +202,6 @@ func end_dash():
 	
 	sprite_tween.parallel().tween_property(sprite, "modulate", Color.WHITE, 0.2) \
 			 .set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	sprite_tween.parallel().tween_property(sprite, "scale", Vector2.ONE, 0.2) \
-			 .set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 	dash_particles.emitting = false
 
@@ -236,7 +209,11 @@ func end_dash():
 		movement_particles.emitting = true
 
 	velocity += dash_direction * 200.0
-	_start_trail_fade(dash_trail, dash_trail_tween, dash_trail_fade_duration, _on_dash_trail_fade_complete)
+	
+	# Return trail to normal appearance
+	if current_trail:
+		current_trail.width = 25.0
+		current_trail.default_color = Color(0.7, 0.9, 1.2, 0.2)
 
 # --- Enhanced Movement System ---
 func _handle_mouse_input():
@@ -281,89 +258,13 @@ func _handle_rotation_and_turns(delta):
 	if velocity.length() > 2.0:
 		var target_rotation = velocity.angle()
 		rotation = lerp_angle(rotation, target_rotation, turn_rate * delta)
-		
-		var rotation_change = abs(angle_difference(rotation, last_rotation))
-		var turn_speed = rotation_change / delta
-		
-		if turn_speed > sharp_turn_threshold:
-			if not is_sharp_turning:
-				is_sharp_turning = true
-				_reset_turn_trails()
-			
-			_update_turn_trail(turn_trail_points_left, turn_fx_left)
-			_update_turn_trail(turn_trail_points_right, turn_fx_right)
-		else:
-			if is_sharp_turning:
-				is_sharp_turning = false
-				_start_turn_trails_fade()
-		
 		last_rotation = rotation
-
-# --- Unified Trail System ---
-func _reset_trail(trail_points: Array, trail_line: Line2D):
-	trail_points.clear()
-	trail_line.visible = true
-
-func _reset_turn_trails():
-	_reset_trail(turn_trail_points_left, turn_fx_left)
-	_reset_trail(turn_trail_points_right, turn_fx_right)
-
-func _update_trail(trail_points: Array, trail_line: Line2D, max_points: int):
-	trail_points.append(global_position)
-	if trail_points.size() > max_points:
-		trail_points.pop_front()
-	
-	trail_line.clear_points()
-	trail_line.visible = true
-	
-	for point in trail_points:
-		trail_line.add_point(to_local(point))
-
-func _update_turn_trail(trail_points: Array, trail_line: Line2D):
-	_update_trail(trail_points, trail_line, max_turn_trail_points)
-
-func _update_dash_trail():
-	_update_trail(dash_trail_points, dash_trail, max_trail_points)
-
-func _update_movement_trail():
-	_update_trail(movement_trail_points, movement_trail, max_movement_trail_points)
-
-func _start_trail_fade(trail_line: Line2D, tween_ref: Tween, duration: float, callback: Callable):
-	if not is_instance_valid(trail_line):
-		return
-
-	_safe_kill_tween(tween_ref)
-	tween_ref = _create_safe_tween()
-	
-	tween_ref.tween_property(trail_line, "modulate:a", 0.0, duration) \
-			 .set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tween_ref.finished.connect(callback)
-
-func _start_turn_trails_fade():
-	_start_trail_fade(turn_fx_left, turn_trail_left_tween, turn_trail_fade_speed, 
-					 func(): _on_turn_trail_fade_complete("left"))
-	_start_trail_fade(turn_fx_right, turn_trail_right_tween, turn_trail_fade_speed, 
-					 func(): _on_turn_trail_fade_complete("right"))
-
-func _on_turn_trail_fade_complete(side: String):
-	var trail_line = turn_fx_left if side == "left" else turn_fx_right
-	var trail_points = turn_trail_points_left if side == "left" else turn_trail_points_right
-	
-	trail_line.visible = false
-	trail_line.modulate.a = 1.0
-	trail_points.clear()
-
-func _on_dash_trail_fade_complete():
-	dash_trail.visible = false
-	dash_trail.modulate.a = 1.0
-	dash_trail_points.clear()
 
 # --- Movement Particles ---
 func _update_movement_particles():
 	if movement_particles:
 		if velocity.length() > 30.0:
 			movement_particles.emitting = true
-			movement_particles.process_material.direction = Vector3(-velocity.normalized().x, -velocity.normalized().y, 0)
 		else:
 			movement_particles.emitting = false
 
@@ -422,8 +323,8 @@ func _on_collectable_entered(body: Node2D):
 		body.trigger_collection()
 		letter_pickedup.emit(body.letter_char)
 
-
 func take_damage(amount: int):
+	damage_particles.emitting = true
 	current_hp -= amount
 	trigger_hit_pause()
 	SoundManager.play_sound_with_pitch(HURT_SFX, randf_range(0.75, 1.0))
@@ -434,7 +335,6 @@ func take_damage(amount: int):
 		die()
 	else:
 		become_invincible()
-
 
 func become_invincible():
 	if not is_instance_valid(sprite):

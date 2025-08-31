@@ -24,7 +24,7 @@ collision_mask = 10
 physics_material_override = SubResource("PhysicsMaterial_42io4")
 lock_rotation = true
 script = ExtResource("1_7npwx")
-initial_speed = 400.0
+evasion_force = 100.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_01bto")

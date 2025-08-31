@@ -1,35 +1,27 @@
-[gd_scene load_steps=6 format=3 uid="uid://cmdf5vqe2nbnu"]
-
-[sub_resource type="Gradient" id="Gradient_qyac0"]
-colors = PackedColorArray(1, 0, 0, 1, 1, 1, 1, 1)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_r6n6p"]
-gradient = SubResource("Gradient_qyac0")
+[gd_scene load_steps=3 format=3 uid="uid://cmdf5vqe2nbnu"]
 
 [sub_resource type="Curve" id="Curve_qj5wn"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 2
 
-[sub_resource type="CurveTexture" id="CurveTexture_g3mel"]
-curve = SubResource("Curve_qj5wn")
+[sub_resource type="Gradient" id="Gradient_qyac0"]
+colors = PackedColorArray(1, 0, 0, 1, 1, 1, 1, 1)
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_aijax"]
-particle_flag_disable_z = true
-emission_shape = 3
-emission_box_extents = Vector3(400, 32.39, 1)
-spread = 180.0
-initial_velocity_min = 91.5
-initial_velocity_max = 100.0
-gravity = Vector3(0, 0, 0)
-scale_min = 13.5199995
-scale_max = 57.21
-scale_curve = SubResource("CurveTexture_g3mel")
-color_ramp = SubResource("GradientTexture1D_r6n6p")
-
-[node name="WordPickup" type="GPUParticles2D"]
+[node name="WordPickup" type="CPUParticles2D"]
 emitting = false
 amount = 30
 one_shot = true
 explosiveness = 1.0
 randomness = 1.0
-process_material = SubResource("ParticleProcessMaterial_aijax")
+fixed_fps = 30
+draw_order = 1
+emission_shape = 3
+emission_rect_extents = Vector2(400, 32.39)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 91.5
+initial_velocity_max = 100.0
+scale_amount_min = 13.5199995
+scale_amount_max = 57.21
+scale_amount_curve = SubResource("Curve_qj5wn")
+color_ramp = SubResource("Gradient_qyac0")

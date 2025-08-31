@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=3 uid="uid://ouibpkfc5ldb"]
+[gd_scene load_steps=37 format=3 uid="uid://ouibpkfc5ldb"]
 
 [ext_resource type="Texture2D" uid="uid://dfti6kfs3nf2a" path="res://assets/textures/explosion_fx/small_explosion/0.png" id="1_q23uv"]
 [ext_resource type="Script" uid="uid://b1rji85gmxpbd" path="res://scenes/attacks/missile/missile_explosion_fx.gd" id="1_viv7t"]
@@ -35,32 +35,9 @@
 [ext_resource type="Texture2D" uid="uid://c7buj116myjrw" path="res://assets/textures/explosion_fx/small_explosion/31.png" id="32_fvpfe"]
 [ext_resource type="Texture2D" uid="uid://c4sbufcoblab6" path="res://assets/textures/explosion_fx/small_explosion/32.png" id="33_68faa"]
 
-[sub_resource type="Gradient" id="Gradient_psqhx"]
-colors = PackedColorArray(1, 0, 0, 1, 0.22, 0.22, 0.22, 0)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_fyuiw"]
-gradient = SubResource("Gradient_psqhx")
-
-[sub_resource type="Curve" id="Curve_qj5wn"]
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+[sub_resource type="Curve" id="Curve_viv7t"]
+_data = [Vector2(0.022336766, 0.7284595), 0.0, 1.5391438, 0, 0, Vector2(1, 0), -0.7451027, 0.0, 1, 0]
 point_count = 2
-
-[sub_resource type="CurveTexture" id="CurveTexture_g3mel"]
-curve = SubResource("Curve_qj5wn")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_im20w"]
-particle_flag_disable_z = true
-emission_shape = 1
-emission_sphere_radius = 5.3
-spread = 180.0
-initial_velocity_min = 80.0
-initial_velocity_max = 100.0
-gravity = Vector3(0, 0, 0)
-scale_min = 10.0
-scale_max = 20.0
-scale_curve = SubResource("CurveTexture_g3mel")
-color = Color(0.15, 0.15, 0.15, 1)
-color_ramp = SubResource("GradientTexture1D_fyuiw")
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_3yfxu"]
 animations = [{
@@ -172,12 +149,20 @@ animations = [{
 [node name="missile_explosion_fx" type="Node2D"]
 script = ExtResource("1_viv7t")
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+[node name="CPUParticles2D" type="CPUParticles2D" parent="."]
 emitting = false
-amount = 12
 one_shot = true
 explosiveness = 1.0
-process_material = SubResource("ParticleProcessMaterial_im20w")
+emission_shape = 1
+emission_sphere_radius = 5.7
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 20.0
+initial_velocity_max = 100.0
+scale_amount_min = 2.0
+scale_amount_max = 10.0
+scale_amount_curve = SubResource("Curve_viv7t")
+color = Color(0, 0, 0, 1)
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
 scale = Vector2(3, 3)

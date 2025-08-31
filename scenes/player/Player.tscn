@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://corxhrleskgv"]
+[gd_scene load_steps=13 format=3 uid="uid://corxhrleskgv"]
 
 [ext_resource type="Script" uid="uid://ct2s5gu2mvdyu" path="res://scenes/player/Player.gd" id="1_p0vlq"]
 [ext_resource type="Texture2D" uid="uid://dnj15kqmp5xsi" path="res://assets/textures/ship.png" id="2_4kuee"]
@@ -11,67 +11,30 @@ radius = 4.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tpg5x"]
 
-[sub_resource type="Curve" id="Curve_524rm"]
-_data = [Vector2(0, 0.98683333), 0.0, 0.0, 0, 0, Vector2(0.85160434, 0), 0.0, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="CurveTexture" id="CurveTexture_tpg5x"]
-curve = SubResource("Curve_524rm")
-
 [sub_resource type="Curve" id="Curve_v42im"]
 _data = [Vector2(0, 0.90344375), 0.0, -0.13678843, 0, 0, Vector2(0.14572194, 0.9370922), 0.0, 0.0, 0, 0, Vector2(0.48930487, 0.7454424), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 4
 
-[sub_resource type="CurveTexture" id="CurveTexture_pn6s4"]
-curve = SubResource("Curve_v42im")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_4kuee"]
-particle_flag_disable_z = true
-emission_shape_scale = Vector3(5.81, 2.79, 1)
-angle_min = -360.0
-angle_max = 360.00003
-initial_velocity_min = -1.0
-initial_velocity_max = 1.0
-gravity = Vector3(0, 0, 0)
-scale_min = 0.049999997
-scale_max = 0.099999994
-scale_curve = SubResource("CurveTexture_pn6s4")
-alpha_curve = SubResource("CurveTexture_tpg5x")
-
-[sub_resource type="Curve" id="Curve_tpg5x"]
-_data = [Vector2(0, 0.4698795), 0.0, 0.0, 0, 0, Vector2(0.49360144, 0.40160638), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+[sub_resource type="Curve" id="Curve_npwbq"]
+_data = [Vector2(0, 0.12780142), 0.0, -0.11413006, 0, 0, Vector2(0.08739496, 0.9889362), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 3
 
-[sub_resource type="CurveTexture" id="CurveTexture_c3xxp"]
-curve = SubResource("Curve_tpg5x")
+[sub_resource type="Curve" id="Curve_tpg5x"]
+_data = [Vector2(0, 0.998156), 0.0, -0.049126636, 0, 0, Vector2(0.57983196, 0.9668085), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
 
-[sub_resource type="Curve" id="Curve_npwbq"]
-_data = [Vector2(0, 0), 0.0, -0.11413006, 0, 0, Vector2(0.99999994, 0.9962482), 0.0, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="CurveTexture" id="CurveTexture_v42im"]
-curve = SubResource("Curve_npwbq")
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_524rm"]
-particle_flag_disable_z = true
-gravity = Vector3(0, 0, 0)
-scale_min = 0.29999998
-scale_max = 0.29999998
-scale_curve = SubResource("CurveTexture_v42im")
-color = Color(0.99999946, 0.25715935, 0.14630243, 1)
-alpha_curve = SubResource("CurveTexture_c3xxp")
+[sub_resource type="Gradient" id="Gradient_c3xxp"]
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 0)
 
 [sub_resource type="Curve" id="Curve_4kuee"]
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.5548363, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Gradient" id="Gradient_tpg5x"]
-colors = PackedColorArray(1, 1, 1, 0, 1, 0.9063318, 0.13335153, 1)
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.58966076, 0.98228407), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.05721463, 0.0, 0, 0]
+point_count = 3
 
 [node name="Player" type="Node2D" groups=["player"]]
 script = ExtResource("1_p0vlq")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(1.86, 1.86)
 texture = ExtResource("2_4kuee")
 
 [node name="Reticle" type="Sprite2D" parent="."]
@@ -93,56 +56,73 @@ collision_mask = 4
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollectableArea"]
 shape = SubResource("CircleShape2D_tpg5x")
 
-[node name="MovementParticles" type="GPUParticles2D" parent="."]
+[node name="MovementParticles" type="CPUParticles2D" parent="."]
 z_index = -1
-position = Vector2(-10, 0)
+position = Vector2(-10, 1)
 amount = 20
 texture = ExtResource("4_tpg5x")
 lifetime = 0.8
-randomness = 0.5
-process_material = SubResource("ParticleProcessMaterial_4kuee")
+explosiveness = 0.1
+randomness = 0.71
+fixed_fps = 30
+draw_order = 1
+emission_shape = 3
+emission_rect_extents = Vector2(12.98, -6.84)
+gravity = Vector2(0, 0)
+initial_velocity_min = -1.0
+initial_velocity_max = 1.0
+angle_min = -360.0
+angle_max = 360.00003
+scale_amount_min = 0.05
+scale_amount_max = 0.3
+scale_amount_curve = SubResource("Curve_v42im")
 
-[node name="DashParticles" type="GPUParticles2D" parent="."]
-process_material = SubResource("ParticleProcessMaterial_524rm")
+[node name="DashParticles" type="CPUParticles2D" parent="."]
+position = Vector2(-9, -1)
+emitting = false
+texture = ExtResource("4_tpg5x")
+one_shot = true
+explosiveness = 1.0
+fixed_fps = 30
+draw_order = 1
+emission_shape = 3
+emission_rect_extents = Vector2(3.47, -20.5)
+gravity = Vector2(0, 0)
+scale_amount_min = 0.29999998
+scale_amount_max = 0.29999998
+scale_amount_curve = SubResource("Curve_npwbq")
 
-[node name="IdlePulseParticles" type="GPUParticles2D" parent="."]
+[node name="IdlePulseParticles" type="CPUParticles2D" parent="."]
 z_index = -1
 amount = 2
 texture = ExtResource("5_tpg5x")
 lifetime = 3.0
+fixed_fps = 30
 local_coords = true
-process_material = SubResource("ParticleProcessMaterial_524rm")
+draw_order = 1
+gravity = Vector2(0, 0)
+scale_amount_min = 0.29999998
+scale_amount_max = 0.29999998
+scale_amount_curve = SubResource("Curve_npwbq")
+color = Color(1, 0.2627451, 0.14901961, 0.30980393)
 
-[node name="MovementTrail" type="Line2D" parent="."]
-z_index = -1
-points = PackedVector2Array(-33.25, 0, -30, 0, -25, 0, -20, 0, -15, 0, -10, 0, -5, 0, 0, 0)
-width = 24.18
-width_curve = SubResource("Curve_4kuee")
-default_color = Color(1, 1, 1, 0.30600002)
-
-[node name="TurnFXLeft" type="Line2D" parent="."]
-visible = false
-z_index = -1
-position = Vector2(0, -10)
-points = PackedVector2Array(-10, 0, 0, 0)
-width = 4.0
-width_curve = SubResource("Curve_4kuee")
-
-[node name="TurnFXRight" type="Line2D" parent="."]
-visible = false
-z_index = -1
-position = Vector2(0, 10)
-points = PackedVector2Array(-10, 0, 0, 0)
-width = 4.0
-width_curve = SubResource("Curve_4kuee")
-
-[node name="DashTrail" type="Line2D" parent="."]
-visible = false
-points = PackedVector2Array(-20.13, 0, 0, 0)
-width = 24.18
-width_curve = SubResource("Curve_4kuee")
-default_color = Color(1, 0.9063318, 0.13335153, 1)
-gradient = SubResource("Gradient_tpg5x")
+[node name="DamageParticles" type="CPUParticles2D" parent="."]
+position = Vector2(1, 0)
+emitting = false
+amount = 30
+one_shot = true
+explosiveness = 1.0
+randomness = 1.0
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 50.0
+initial_velocity_max = 100.0
+scale_amount_min = 2.0
+scale_amount_max = 10.0
+scale_amount_curve = SubResource("Curve_tpg5x")
+color = Color(0.03137255, 0.03137255, 0.03137255, 1)
+color_ramp = SubResource("Gradient_c3xxp")
+hue_variation_max = 0.28
 
 [node name="DashDial" type="Line2D" parent="."]
 points = PackedVector2Array(0, 0, 0, 0)
@@ -153,3 +133,12 @@ default_color = Color(0, 0, 0, 1)
 points = PackedVector2Array(0, 0, 0, 0)
 width_curve = SubResource("Curve_4kuee")
 default_color = Color(0, 0, 0, 1)
+
+[node name="engine_marker" type="Marker2D" parent="."]
+position = Vector2(-5, 0)
+
+[node name="wing1_marker" type="Marker2D" parent="."]
+position = Vector2(-2, -16)
+
+[node name="wing2_marker" type="Marker2D" parent="."]
+position = Vector2(-2, 17)

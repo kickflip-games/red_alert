@@ -7,7 +7,7 @@ extends RichTextLabel
 @export var wave_frequency: float = 5.0
 @export var letter_spacing: float = 10.0
 
-@export var word_fx: GPUParticles2D
+@export var word_fx: CPUParticles2D
 
 
 var collected_letters: Array[String] = []

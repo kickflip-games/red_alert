@@ -32,9 +32,9 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -540.0
+offset_left = -551.0
 offset_top = 18.0
-offset_right = -283.0
+offset_right = -120.0
 offset_bottom = 101.0
 grow_horizontal = 2
 alignment = 1
@@ -51,6 +51,16 @@ texture = ExtResource("2_atyv1")
 expand_mode = 2
 
 [node name="TextureRect3" type="TextureRect" parent="GameUi/Hearts"]
+layout_mode = 2
+texture = ExtResource("2_atyv1")
+expand_mode = 2
+
+[node name="TextureRect4" type="TextureRect" parent="GameUi/Hearts"]
+layout_mode = 2
+texture = ExtResource("2_atyv1")
+expand_mode = 2
+
+[node name="TextureRect5" type="TextureRect" parent="GameUi/Hearts"]
 layout_mode = 2
 texture = ExtResource("2_atyv1")
 expand_mode = 2
