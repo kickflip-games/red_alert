@@ -202,7 +202,7 @@ spawn_delay = 0.0
 spawn_radius = 600.0
 max_num_active = 8
 missile_count = 30
-fire_rate = 0.19999999999708962
+fire_rate = 0.1999999999970896
 attack_duration = 10.0
 
 [node name="MovingWave0" parent="AttackManager/EasyWaves" instance=ExtResource("6_bjd11")]
@@ -269,7 +269,7 @@ rotates = false
 position = Vector2(56, 0)
 stream_width = 30.0
 bullet_spacing = 80.0
-fire_rate = 0.19999999999708962
+fire_rate = 0.1999999999970896
 bullet_count = 100
 path_follow = NodePath("../Path2D/PathFollow2D")
 path_speed = 500.0
@@ -280,7 +280,7 @@ rotation_speed = 100.0
 position = Vector2(1087, 645)
 stream_width = 30.0
 bullet_spacing = 80.0
-fire_rate = 0.19999999999708962
+fire_rate = 0.1999999999970896
 bullet_count = 100
 path_follow = NodePath("../Path2D2/PathFollow2D")
 path_speed = 500.0
